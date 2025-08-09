@@ -3,6 +3,9 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, UploadFile
 from openai import OpenAI
+from pydantic import BaseModel
+
+from . import openai_extractor
 
 app = FastAPI()
 client: OpenAI | None = None
@@ -41,5 +44,29 @@ async def transcribe(file: UploadFile = None) -> dict[str, Any]:  # type: ignore
         )
         text = getattr(result, "text", None) or getattr(result, "data", {}).get("text")  # defensive
         return {"filename": file.filename, "text": text}
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class PreferenceExtractRequest(BaseModel):
+    conversation: str
+    model: str | None = None
+
+
+@app.post("/preferences/extract")
+def preferences_extract(req: PreferenceExtractRequest) -> dict[str, Any]:
+    """Extract structured garment preferences from a conversation transcript.
+
+    Body:
+      conversation: Raw conversation text (required)
+      model: Optional OpenAI model override (default gpt-4o-mini)
+    """
+    if not req.conversation.strip():
+        raise HTTPException(status_code=400, detail="conversation must not be empty")
+    try:
+        result = openai_extractor.extract_preferences(
+            conversation=req.conversation, model=req.model or "gpt-4o-mini"
+        )
+        return result
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e)) from e
