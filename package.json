@@ -1,0 +1,12 @@
+{
+  "name": "vintage-vault-root",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+  "web:dev": "npm --prefix ./frontend/web run dev",
+  "web:lint": "npm --prefix ./frontend/web run lint",
+  "web:typecheck": "npm --prefix ./frontend/web run typecheck",
+  "web:build": "npm --prefix ./frontend/web run build",
+  "web:preview": "npm --prefix ./frontend/web run start"
+  }
+}

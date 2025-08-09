@@ -1,0 +1,54 @@
+### General ###
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.env
+.env*
+!.env.example
+
+### Node / Frontend ###
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+coverage/
+
+### Python / Backend ###
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+### Docker ###
+docker-data/
+
+### iOS / Xcode ###
+**/DerivedData/
+**/build/
+*.xcworkspace/
+*.xcuserstate
+*.xcuserdatad/
+*.xcscmblueprint
+
+### IDE / Editor ###
+.idea/
+.vscode/
+*.code-workspace
+
+### Misc ###
+coverage.xml
+reports/
+tmp/

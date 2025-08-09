@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Vault Logo</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f1eb 0%, #e8ddd4 100%);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        .logo-container {
+            background: white;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 30px;
+            text-align: center;
+            border: 3px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 49%, rgba(212, 175, 55, 0.1) 50%, transparent 51%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .main-logo {
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-icon {
+            display: inline-block;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .vault-door {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2c1810 0%, #4a2c1a 50%, #6d4423 100%);
+            border-radius: 50%;
+            position: relative;
+            border: 4px solid #d4af37;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .vault-handle {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            right: -10px;
+            transform: translateY(-50%);
+            border: 2px solid #8b6914;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .vintage-accent {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(45deg, #c41e3a, #8b1538);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #2c1810;
+            margin: 20px 0 10px 0;
+            letter-spacing: -2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', serif;
+        }
+
+        .brand-name .vintage {
+            color: #c41e3a;
+            position: relative;
+        }
+
+        .brand-name .vault {
+            color: #d4af37;
+            position: relative;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: #6d4423;
+            font-style: italic;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        .logo-variations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin-top: 50px;
+        }
+
+        .variation {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 2px solid #e8ddd4;
+        }
+
+        .variation h3 {
+            color: #2c1810;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .mini-logo .brand-name {
+            font-size: 1.8rem;
+            margin: 10px 0;
+        }
+
+        .mini-logo .vault-door {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #d4af37;
+        }
+
+        .mini-logo .vault-handle {
+            width: 12px;
+            height: 12px;
+            right: -6px;
+            border: 1px solid #8b6914;
+        }
+
+        .mini-logo .vintage-accent {
+            width: 15px;
+            height: 15px;
+            font-size: 8px;
+            top: -3px;
+            right: -3px;
+        }
+
+        .horizontal-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .horizontal-logo .brand-name {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .monochrome .brand-name {
+            color: #2c1810;
+        }
+
+        .monochrome .vault-door {
+            background: linear-gradient(135deg, #333, #666);
+        }
+
+        .monochrome .vault-handle {
+            background: linear-gradient(135deg, #888, #666);
+        }
+
+        .monochrome .vintage-accent {
+            background: linear-gradient(45deg, #333, #555);
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #2c1810 0%, #4a2c1a 50%, #6d4423 100%);
+            border-radius: 25px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 3px solid #d4af37;
+        }
+
+        .app-icon .vault-door {
+            border-color: #d4af37;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3);
+        }
+
+        .dns-suggestions {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-top: 50px;
+            max-width: 800px;
+            text-align: left;
+        }
+
+        .dns-suggestions h2 {
+            color: #2c1810;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .dns-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: #f8f6f3;
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
+            transition: all 0.3s ease;
+        }
+
+        .dns-option:hover {
+            background: #f0ede6;
+            transform: translateX(5px);
+        }
+
+        .dns-name {
+            font-weight: bold;
+            color: #2c1810;
+            font-size: 1.1rem;
+        }
+
+        .dns-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .premium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .check-required {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <div class="main-logo">
+            <div class="vault-icon">
+                <div class="vault-door">
+                    <div class="vault-handle"></div>
+                </div>
+                <div class="vintage-accent">V</div>
+            </div>
+            <div class="brand-name">
+                <span class="vintage">VINTAGE</span> <span class="vault">VAULT</span>
+            </div>
+            <div class="tagline">Curated Stories, Timeless Style</div>
+        </div>
+    </div>
+
+    <div class="logo-variations">
+        <div class="variation">
+            <h3>Compact Version</h3>
+            <div class="mini-logo">
+                <div class="vault-icon">
+                    <div class="vault-door">
+                        <div class="vault-handle"></div>
+                    </div>
+                    <div class="vintage-accent">V</div>
+                </div>
+                <div class="brand-name">
+                    <span class="vintage">VINTAGE</span> <span class="vault">VAULT</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="variation">
+            <h3>Horizontal Layout</h3>
+            <div class="horizontal-logo">
+                <div class="vault-icon">
+                    <div class="vault-door">
+                        <div class="vault-handle"></div>
+                    </div>
+                    <div class="vintage-accent">V</div>
+                </div>
+                <div class="brand-name">
+                    <span class="vintage">VINTAGE</span> <span class="vault">VAULT</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="variation monochrome">
+            <h3>Monochrome Version</h3>
+            <div class="mini-logo">
+                <div class="vault-icon">
+                    <div class="vault-door">
+                        <div class="vault-handle"></div>
+                    </div>
+                    <div class="vintage-accent">V</div>
+                </div>
+                <div class="brand-name">
+                    <span>VINTAGE VAULT</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="variation">
+            <h3>App Icon</h3>
+            <div class="app-icon">
+                <div class="vault-icon">
+                    <div class="vault-door">
+                        <div class="vault-handle"></div>
+                    </div>
+                    <div class="vintage-accent">V</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dns-suggestions">
+        <h2>🌐 Recommended Domain Names</h2>
+        
+        <div class="dns-option">
+            <div class="dns-name">vintagevault.co</div>
+            <div class="dns-status available">Likely Available</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">vintagevault.app</div>
+            <div class="dns-status available">Likely Available</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">thevintage.vault</div>
+            <div class="dns-status check-required">Check Availability</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">vintagevault.com</div>
+            <div class="dns-status premium">Premium Domain</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">vintagevaul.tv</div>
+            <div class="dns-status available">Creative Alternative</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">vvault.co</div>
+            <div class="dns-status available">Short & Memorable</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">curatevintage.com</div>
+            <div class="dns-status available">Descriptive</div>
+        </div>
+        
+        <div class="dns-option">
+            <div class="dns-name">vintastyle.com</div>
+            <div class="dns-status available">AI Assistant Focus</div>
+        </div>
+    </div>
+</body>
+</html>

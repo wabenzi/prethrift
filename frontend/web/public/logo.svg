@@ -1,0 +1,24 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="40" fill="#fff"/>
+  <circle cx="100" cy="100" r="60" fill="url(#vaultGradient)" stroke="#d4af37" stroke-width="8"/>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="#d4af37" stroke-width="8"/>
+  <circle cx="100" cy="100" r="12" fill="url(#handleGradient)" stroke="#8b6914" stroke-width="3"/>
+  <circle cx="155" cy="55" r="16" fill="url(#accentGradient)" stroke="#fff" stroke-width="3"/>
+  <text x="155" y="61" text-anchor="middle" fill="#fff" font-size="13" font-family="Georgia,serif" font-weight="bold">V</text>
+  <text x="100" y="170" text-anchor="middle" fill="#2c1810" font-size="36" font-family="Times New Roman,serif" font-weight="bold">VINTAGE <tspan fill="#d4af37">VAULT</tspan></text>
+  <defs>
+    <linearGradient id="vaultGradient" x1="40" y1="40" x2="160" y2="160" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2c1810"/>
+      <stop offset="0.5" stop-color="#4a2c1a"/>
+      <stop offset="1" stop-color="#6d4423"/>
+    </linearGradient>
+    <linearGradient id="handleGradient" x1="88" y1="88" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d4af37"/>
+      <stop offset="1" stop-color="#b8941f"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="139" y1="39" x2="171" y2="71" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c41e3a"/>
+      <stop offset="1" stop-color="#8b1538"/>
+    </linearGradient>
+  </defs>
+</svg>

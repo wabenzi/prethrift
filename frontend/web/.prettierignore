@@ -1,0 +1,20 @@
+# Build output
+/dist
+
+# Dependencies
+/node_modules
+
+# Environment & lock files
+.env*
+
+# Git
+.git
+
+# Misc
+coverage
+.tmp
+*.log
+*.cache
+
+# Ignore generated artifacts
+/public/*.png
