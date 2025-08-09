@@ -10,3 +10,7 @@ ruff
 mypy
 nox
 pre-commit
+torch
+torchvision
+pillow
+scikit-learn
