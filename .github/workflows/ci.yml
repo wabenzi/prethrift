@@ -34,8 +34,10 @@ jobs:
         run: |
           echo 'No type checking configured yet.'
       - name: Unit tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
-          echo 'No tests yet.'
+          pytest -q backend/tests
 
   frontend:
     name: Frontend (Vite React)
