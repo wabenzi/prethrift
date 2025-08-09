@@ -4,4 +4,4 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"message": "Vintage Vault API"}
+    return {"message": "Prethrift API"}
