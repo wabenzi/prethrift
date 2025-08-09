@@ -1,0 +1,10 @@
+line-length = 100
+extend-exclude = [".venv"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "ARG"]
+ignore = []
+
+[format]
+quote-style = "double"
+indent-style = "space"

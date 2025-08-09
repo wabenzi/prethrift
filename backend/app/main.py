@@ -1,7 +1,8 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from openai import OpenAI
 import os
 from typing import Any
+
+from fastapi import FastAPI, HTTPException, UploadFile
+from openai import OpenAI
 
 app = FastAPI()
 client: OpenAI | None = None
@@ -15,13 +16,16 @@ def get_client() -> OpenAI:
         client = OpenAI()
     return client
 
+
 @app.get("/")
 def read_root():
     return {"message": "Prethrift API"}
 
 
 @app.post("/transcribe")
-async def transcribe(file: UploadFile = File(...)) -> dict[str, Any]:
+async def transcribe(file: UploadFile = None) -> dict[str, Any]:  # type: ignore[assignment]
+    if file is None:  # FastAPI will inject UploadFile for 'file' form field
+        raise HTTPException(status_code=400, detail="Missing file upload field 'file'")
     if not file.filename:
         raise HTTPException(status_code=400, detail="File must have a name")
     try:

@@ -6,3 +6,5 @@ pgvector
 openai
 python-multipart
 pytest
+ruff
+mypy

@@ -27,12 +27,15 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Lint (ruff placeholder)
+      - name: Lint (ruff)
         run: |
-          echo 'No linter configured yet.'
-      - name: Type check (pyright placeholder)
+          ruff check .
+          ruff format --check .
+      - name: Type check (mypy)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
-          echo 'No type checking configured yet.'
+          mypy backend/app
       - name: Unit tests
         env:
           PYTHONPATH: ${{ github.workspace }}

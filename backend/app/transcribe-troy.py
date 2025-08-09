@@ -7,11 +7,13 @@ Requirements:
   - Set OPENAI_API_KEY in your environment.
   - Install dependencies from requirements.txt.
 """
+
 from __future__ import annotations
 
 import os
 import sys
 from pathlib import Path
+
 from openai import OpenAI
 
 
