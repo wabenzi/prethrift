@@ -24,3 +24,20 @@ make transcribe FILE=audio.mp3  # run transcription script
 make ci          # lint + type + test
 make clean       # remove venv & caches
 ```
+
+## Developer Tooling
+Nox sessions (optional):
+```
+nox -l           # list sessions
+nox -s lint      # Ruff lint
+nox -s typecheck # mypy
+nox -s tests     # pytest
+nox -s all       # run lint+type+tests
+```
+
+Pre-commit hooks:
+```
+pip install pre-commit  # (or use existing venv)
+pre-commit install
+```
+Hooks: Ruff (fix & format), mypy, flake8 (extra eyes), basic hygiene checks.

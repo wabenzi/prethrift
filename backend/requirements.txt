@@ -8,3 +8,5 @@ python-multipart
 pytest
 ruff
 mypy
+nox
+pre-commit
