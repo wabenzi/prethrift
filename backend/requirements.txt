@@ -14,3 +14,5 @@ torch
 torchvision
 pillow
 scikit-learn
+jsonschema
+types-jsonschema
