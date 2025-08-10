@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from . import openai_extractor
+from . import openai_extractor, query_pipeline
 from .db_models import Base, Garment
 from .describe_images import describe_image, embed_text
 
@@ -181,3 +181,19 @@ def refresh_description(req: RefreshDescriptionRequest) -> dict[str, Any]:
             raise
         except Exception as e:  # noqa: BLE001
             raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class SearchRequest(BaseModel):
+    query: str
+    limit: int | None = 10
+    model: str | None = None
+
+
+@app.post("/search")
+def search(req: SearchRequest) -> dict[str, Any]:
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="query must not be empty")
+    try:
+        return query_pipeline.search(req.query, limit=req.limit or 10, model=req.model)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e)) from e
