@@ -4,8 +4,12 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, UploadFile
 from openai import OpenAI
 from pydantic import BaseModel
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from . import openai_extractor
+from .db_models import Base, Garment
+from .describe_images import describe_image, embed_text
 
 app = FastAPI()
 client: OpenAI | None = None
@@ -130,3 +134,50 @@ def garments_ingest(req: IngestRequest) -> dict[str, Any]:
         raise
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class RefreshDescriptionRequest(BaseModel):
+    garment_id: int
+    model: str | None = None
+    overwrite: bool = False
+
+
+@app.post("/garments/refresh-description")
+def refresh_description(req: RefreshDescriptionRequest) -> dict[str, Any]:
+    """Recompute a garment's textual description & embedding from its image.
+
+    Requires garment.image_path to be set. Skips if description exists unless overwrite.
+    """
+    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        g = session.get(Garment, req.garment_id)
+        if not g:
+            raise HTTPException(status_code=404, detail="garment not found")
+        if not g.image_path:
+            raise HTTPException(status_code=400, detail="garment has no image_path")
+        if g.description and not req.overwrite:
+            return {"garment_id": g.id, "description": g.description, "cached": True}
+        # Build temporary minimal client wrapper expecting same API as in describe_image
+        if "OPENAI_API_KEY" not in os.environ:
+            raise HTTPException(status_code=400, detail="OPENAI_API_KEY not set")
+        client = get_client()
+        from pathlib import Path
+
+        try:
+            text = describe_image(client, Path(g.image_path), req.model or "gpt-4o-mini")
+            embedding = embed_text(client, text)
+            g.description = text
+            if embedding:
+                g.description_embedding = embedding
+            session.commit()
+            return {
+                "garment_id": g.id,
+                "description": text,
+                "embedding_dims": len(embedding) if embedding else 0,
+                "cached": False,
+            }
+        except HTTPException:
+            raise
+        except Exception as e:  # noqa: BLE001
+            raise HTTPException(status_code=500, detail=str(e)) from e
