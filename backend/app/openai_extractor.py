@@ -6,13 +6,18 @@ import json
 import os
 from typing import Any
 
-from jsonschema import Draft7Validator, ValidationError
+try:  # jsonschema might be optional
+    from jsonschema import Draft7Validator, ValidationError
+except Exception:  # pragma: no cover
+    Draft7Validator = None  # type: ignore
+    ValidationError = Exception  # type: ignore
+
 from openai import OpenAI
 
 from .extractor_schema import PREFERENCE_JSON_SCHEMA
 from .ontology import normalize
 
-_validator = Draft7Validator(PREFERENCE_JSON_SCHEMA)
+_validator = Draft7Validator(PREFERENCE_JSON_SCHEMA) if Draft7Validator is not None else None
 
 SYSTEM_PROMPT = (
     "You extract structured garment preference data. "
@@ -77,7 +82,7 @@ def extract_preferences(conversation: str, model: str = "gpt-4o-mini") -> dict[s
         + "Return JSON with keys: likes, dislikes, constraints (price_max if any), uncertain."
     )
 
-    response = client.chat.completions.create(
+    response: Any = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -85,7 +90,7 @@ def extract_preferences(conversation: str, model: str = "gpt-4o-mini") -> dict[s
         ],
         temperature=0,
     )
-    content = response.choices[0].message.content  # type: ignore[attr-defined]
+    content = getattr(response.choices[0].message, "content", None)
     if not content:
         raise ValueError("Empty response from model")
 
@@ -103,9 +108,10 @@ def extract_preferences(conversation: str, model: str = "gpt-4o-mini") -> dict[s
         raise ValueError(f"Model did not return valid JSON: {e}: {raw[:120]}") from e
 
     # Validate
-    errors = sorted(_validator.iter_errors(data), key=lambda e: e.path)
-    if errors:
-        msgs = [f"{list(err.path)}: {err.message}" for err in errors]
-        raise ValidationError("; ".join(msgs))
+    if _validator is not None:
+        errors = sorted(_validator.iter_errors(data), key=lambda e: e.path)
+        if errors:
+            msgs = [f"{list(err.path)}: {err.message}" for err in errors]
+            raise ValidationError("; ".join(msgs))
 
     return _postprocess(data)

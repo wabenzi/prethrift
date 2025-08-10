@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from openai import OpenAI  # type: ignore
+    from openai import OpenAI
 except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore
 
@@ -54,7 +54,7 @@ def iter_images(images_dir: Path) -> Iterable[Path]:
             yield p
 
 
-def describe_image(client, path: Path, model: str) -> str:  # type: ignore[no-untyped-def]
+def describe_image(client: Any, path: Path, model: str) -> str:
     data_uri = (
         f"data:image/{path.suffix.lstrip('.').lower()};base64,"
         + base64.b64encode(path.read_bytes()).decode()
@@ -73,18 +73,22 @@ def describe_image(client, path: Path, model: str) -> str:  # type: ignore[no-un
         ],
         temperature=0.2,
     )
-    content = resp.choices[0].message.content  # type: ignore[attr-defined]
-    if not content:
+    content = getattr(resp.choices[0].message, "content", None)
+    if not isinstance(content, str) or not content.strip():
         raise RuntimeError("Empty description from model")
     return content.strip()
 
 
-def embed_text(client, text: str) -> list[float]:  # type: ignore[no-untyped-def]
+def embed_text(client: Any, text: str) -> list[float]:
     try:
         emb = client.embeddings.create(model=EMBED_MODEL, input=text)
-        return list(emb.data[0].embedding)  # type: ignore[attr-defined]
+        data0 = getattr(emb, "data", [])
+        if data0 and hasattr(data0[0], "embedding"):
+            vec = list(data0[0].embedding)
+            return [float(x) for x in vec]
     except Exception:  # noqa: BLE001
-        return []
+        pass
+    return []
 
 
 def compute_image_hash(path: Path) -> str:

@@ -7,16 +7,17 @@ from __future__ import annotations
 
 import math
 from collections import OrderedDict
+from typing import Callable
 
 MAX_QUERY_CACHE = 256
 
 
-class _LRU(OrderedDict):
+class _LRU(OrderedDict[str, list[float]]):
     def __init__(self, maxsize: int):
         super().__init__()
         self.maxsize = maxsize
 
-    def get_or_set(self, key, factory):
+    def get_or_set(self, key: str, factory: Callable[[], list[float]]) -> list[float]:
         if key in self:
             val = self.pop(key)
             self[key] = val

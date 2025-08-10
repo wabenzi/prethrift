@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from . import openai_extractor, query_pipeline
+from . import openai_extractor, query_pipeline, user_state
 from .db_models import Base, Garment
 from .describe_images import describe_image, embed_text
 
@@ -38,10 +38,14 @@ async def transcribe(file: UploadFile = None) -> dict[str, Any]:  # type: ignore
     try:
         contents = await file.read()
         # OpenAI client expects a file-like object; use bytes via in-memory buffer
+        import contextlib
         import io
 
         buffer = io.BytesIO(contents)
-        buffer.name = file.filename  # type: ignore[attr-defined]
+        # Assign filename attribute if available (BytesIO in typeshed lacks it)
+        if hasattr(buffer, "__setattr__"):
+            with contextlib.suppress(Exception):  # pragma: no cover
+                buffer.name = file.filename  # type: ignore[attr-defined]
         result = get_client().audio.transcriptions.create(
             model="gpt-4o-transcribe",
             file=buffer,
@@ -150,6 +154,7 @@ def refresh_description(req: RefreshDescriptionRequest) -> dict[str, Any]:
     """
     engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
     Base.metadata.create_all(engine)
+
     with Session(engine) as session:
         g = session.get(Garment, req.garment_id)
         if not g:
@@ -207,6 +212,8 @@ class FeedbackRequest(BaseModel):
     garment_id: int
     action: str  # like, dislike, view, click
     weight: float | None = None
+    # Optional flag to indicate this feedback should influence negative profile centroid
+    negative: bool | None = None
 
 
 @app.post("/feedback")
@@ -224,7 +231,8 @@ def feedback(req: FeedbackRequest) -> dict[str, Any]:
         garment = session.get(Garment, req.garment_id)
         if not garment:
             raise HTTPException(status_code=404, detail="garment not found")
-        _ = garment.attributes  # load
+        _ = garment.attributes  # ensure attributes eager loaded
+
         # Record raw interaction event
         session.add(
             InteractionEvent(
@@ -234,17 +242,18 @@ def feedback(req: FeedbackRequest) -> dict[str, Any]:
                 weight_delta=req.weight or 1.0,
             )
         )
-        # Simple direct preference update: for LIKE increase weights, DISLIKE decrease
+
+        # Preference weight delta by action type
         delta = 0.0
         if action == "like":
             delta = req.weight or 1.0
         elif action == "dislike":
             delta = -1.0 * (req.weight or 1.0)
-        # views/clicks produce smaller signals
         elif action == "view":
             delta = 0.1 * (req.weight or 1.0)
         elif action == "click":
             delta = 0.3 * (req.weight or 1.0)
+
         if delta != 0 and garment.attributes:
             for ga in garment.attributes:
                 av_id = ga.attribute_value_id
@@ -254,7 +263,7 @@ def feedback(req: FeedbackRequest) -> dict[str, Any]:
                         & (UserPreference.attribute_value_id == av_id)
                     )
                 )
-                if not pref:
+                if pref is None:
                     session.add(
                         UserPreference(
                             user_id=req.user_id,
@@ -265,5 +274,10 @@ def feedback(req: FeedbackRequest) -> dict[str, Any]:
                     )
                 else:
                     pref.weight += delta
+
         session.commit()
-        return {"status": "ok"}
+
+    # Invalidate cached user embeddings so next search reflects change
+    user_state.set_user_embedding(req.user_id, None)
+    user_state.set_user_embedding(req.user_id + "__neg", None)
+    return {"status": "ok"}
