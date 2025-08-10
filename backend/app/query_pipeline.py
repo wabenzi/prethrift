@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from . import openai_extractor
+from . import openai_extractor, user_state
 from .db_models import Base, Garment
 from .describe_images import embed_text
 
@@ -62,7 +62,7 @@ def parse_query(text: str, model: str | None = None) -> ParsedQuery:
     from .main import get_client  # inline import
 
     client = get_client()
-    emb = embed_text(client, text)
+    emb = user_state.cache_query_embedding(text, lambda t: embed_text(client, t))
     return ParsedQuery(raw=text, attributes=attribs, text_embedding=emb)
 
 
@@ -111,6 +111,36 @@ def _load_user_preferences(user_id: str | None) -> dict[int, float]:
     return prefs
 
 
+def _load_user_positive_embedding(user_id: str | None) -> list[float] | None:
+    if not user_id:
+        return None
+    cached = user_state.get_user_embedding(user_id)
+    if cached is not None:
+        return cached
+    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
+    Base.metadata.create_all(engine)
+
+    from sqlalchemy import select as _select
+
+    from .db_models import InteractionEvent
+
+    with Session(engine) as session:
+        events = session.scalars(
+            _select(InteractionEvent).where(
+                (InteractionEvent.user_id == user_id)
+                & (InteractionEvent.event_type.in_(["like", "click"]))
+            )
+        ).all()
+        vectors: list[list[float]] = []
+        for ev in events:
+            g = session.get(Garment, ev.garment_id)
+            if g and g.description_embedding:
+                vectors.append(g.description_embedding)
+        emb = user_state.combine_embeddings(vectors)
+        user_state.set_user_embedding(user_id, emb)
+        return emb
+
+
 def retrieve_and_rank(
     parsed: ParsedQuery, limit: int = 10, user_id: str | None = None
 ) -> list[RankedGarment]:
@@ -124,17 +154,22 @@ def retrieve_and_rank(
             # access relationship to load
             _ = g.attributes
         user_pref_weights = _load_user_preferences(user_id)
+        user_positive_emb = _load_user_positive_embedding(user_id)
         results: list[RankedGarment] = []
         for g in garments:
             explanation: dict[str, float] = {}
             score = 0.0
+            text_sim_weight = 0.6
+            attr_weight = 0.25
+            pref_weight = 0.1
+            pos_centroid_weight = 0.15
             if parsed.text_embedding and g.description_embedding:
                 sim = _cos(parsed.text_embedding, g.description_embedding)
                 explanation["text_similarity"] = sim
-                score += 0.7 * sim
+                score += text_sim_weight * sim
             attr_score = _attribute_overlap_score(parsed, g)
             explanation["attribute_overlap"] = attr_score
-            score += 0.3 * attr_score
+            score += attr_weight * attr_score
             # preference score: average weight of garment attributes present in user prefs
             if user_pref_weights and g.attributes:
                 weights = [user_pref_weights.get(ga.attribute_value_id, 0.0) for ga in g.attributes]
@@ -145,7 +180,11 @@ def retrieve_and_rank(
 
                     bounded = _m.tanh(pref_score / 3.0)  # soft bound
                     explanation["preference_weight"] = bounded
-                    score += 0.2 * bounded
+                    score += pref_weight * bounded
+            if user_positive_emb and g.description_embedding:
+                pos_sim = _cos(user_positive_emb, g.description_embedding)
+                explanation["positive_profile_similarity"] = pos_sim
+                score += pos_centroid_weight * pos_sim
             if score > 0:
                 results.append(
                     RankedGarment(
