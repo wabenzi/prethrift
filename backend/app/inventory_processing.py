@@ -62,7 +62,7 @@ def multi_garment_prompt(ontology_families_list: list[str] | None = None) -> str
         "key_attributes (object mapping ontology families you can infer to candidate values).",
         f"Ontology families: {fams}.",
         "Include only confident families. Do NOT fabricate brand names.",
-    "Return ONLY valid JSON.",
+        "Return ONLY valid JSON.",
     ]
     return " ".join(parts)
 
