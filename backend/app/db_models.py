@@ -34,6 +34,8 @@ class Garment(Base):
     currency: Mapped[str | None] = mapped_column(String(8))
     image_path: Mapped[str | None] = mapped_column(String(512))
     image_embedding: Mapped[list[float] | None] = mapped_column(JSON)
+    description: Mapped[str | None] = mapped_column(String(2048))
+    description_embedding: Mapped[list[float] | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     attributes: Mapped[list[GarmentAttribute]] = relationship(
         back_populates="garment", cascade="all,delete-orphan"
