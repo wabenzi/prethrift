@@ -45,7 +45,21 @@ def typecheck(session: nox.Session) -> None:
 def tests(session: nox.Session) -> None:
     session.install("-r", BASE_REQ)
     env = {"PYTHONPATH": os.getcwd()}
-    session.run("pytest", "-q", "backend/tests", *session.posargs, env=env)
+    # Default: run with coverage if not explicitly overridden
+    if any(arg.startswith("--cov") for arg in session.posargs):
+        session.run("pytest", "-q", "backend/tests", *session.posargs, env=env)
+    else:
+        session.run(
+            "pytest",
+            "-q",
+            "--cov=backend/app",
+            "--cov-report=term-missing:skip-covered",
+            "--cov-report=json:backend/coverage.json",
+            "--cov-report=xml:backend/coverage.xml",
+            "backend/tests",
+            *session.posargs,
+            env=env,
+        )
 
 
 @nox.session(python=PYTHON_VERSIONS)

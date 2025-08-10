@@ -112,6 +112,24 @@ def run_ruff_count(root: Path) -> int | None:
         return None
 
 
+def load_coverage(coverage_json: Path) -> dict | None:
+    if not coverage_json.exists():
+        return None
+    try:
+        with coverage_json.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        # Coverage JSON schema from pytest-cov (coverage.py) includes files dict
+        files = data.get("files", {})
+        total_stat = data.get("totals", {})
+        percent = total_stat.get("percent_covered") or total_stat.get("percent_covered_display")
+        return {
+            "percent_covered": percent,
+            "num_files": len(files),
+        }
+    except Exception:
+        return None
+
+
 def compute(metrics: list[FileMetrics], top_n: int) -> dict:
     if not metrics:
         return {"total_files": 0}
@@ -145,6 +163,9 @@ def main() -> None:
     root = Path(args.root).resolve()
     metrics = walk(root)
     result = compute(metrics, args.top)
+    cov = load_coverage(Path("backend/coverage.json"))
+    if cov:
+        result["coverage"] = cov
     ruff_count = run_ruff_count(root)
     if ruff_count is not None:
         result["ruff_warnings"] = ruff_count

@@ -57,7 +57,11 @@ type: | $(VENV_DIR)
 
 test: | $(VENV_DIR)
 	@echo "$(BLUE)[pytest]$(RESET) Running tests"
-	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && pytest -q backend/tests
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && pytest -q --cov=backend/app --cov-report=term-missing:skip-covered --cov-report=json:backend/coverage.json --cov-report=xml:backend/coverage.xml backend/tests
+
+coverage: | $(VENV_DIR)
+	@echo "$(BLUE)[coverage]$(RESET) Re-running tests with coverage (HTML)"
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && pytest -q --cov=backend/app --cov-report=html:backend/htmlcov backend/tests
 
 run: | $(VENV_DIR)
 	@echo "$(BLUE)[uvicorn]$(RESET) Starting (no reload)"
