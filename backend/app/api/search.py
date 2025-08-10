@@ -61,6 +61,49 @@ def _clarify_query(original: str, model: str | None) -> str:
         "improve the results?"
     )
 
+# --- Off-topic detection additions ---
+
+def _build_fashion_vocab() -> set[str]:  # pragma: no cover
+    try:
+        from ..ontology import ONTOLOGY  # type: ignore
+        vocab: set[str] = set()
+        for fam, vals in ONTOLOGY.items():  # noqa: F402
+            vocab.add(fam)
+            vocab.update(vals)
+        vocab.update({
+            "vintage", "retro", "denim", "suede", "leather", "silk", "cotton", "linen", "wool",
+            "outfit", "garment", "clothing"
+        })
+        return vocab
+    except Exception:  # pragma: no cover
+        return {"shirt", "pants", "dress", "skirt", "jacket", "jeans", "vintage", "denim"}
+
+_FASHION_VOCAB = _build_fashion_vocab()
+_OFF_TOPIC_MARKERS = {
+    "bitcoin", "ethereum", "docker", "kubernetes", "recipe", "weather", "forecast", "football",
+    "soccer", "stocks", "price", "currency", "python", "javascript", "movie", "music", "lyrics"
+}
+
+def _is_off_topic(q: str) -> tuple[bool, str]:
+    import re as _re
+    norm = q.lower().strip()
+    if not norm:
+        return True, "empty query"
+    tokens = _re.findall(r"[a-zA-Z]+", norm)
+    if not tokens:
+        return True, "no alpha tokens"
+    if any(t in _OFF_TOPIC_MARKERS for t in tokens):
+        # allow fashion tokens to override
+        fashion_hits = [t for t in tokens if t in _FASHION_VOCAB]
+        if not fashion_hits:
+            return True, "contains off-topic tokens"
+    fashion_hits = [t for t in tokens if t in _FASHION_VOCAB]
+    if fashion_hits:
+        return False, "fashion tokens present"
+    if len(tokens) >= 3:
+        return True, "no fashion tokens in multi-word query"
+    return False, "short generic allowed"
+
 router = APIRouter(prefix="", tags=["search"])
 
 
@@ -69,6 +112,7 @@ class SearchRequest(BaseModel):
     limit: int | None = 10
     model: str | None = None
     user_id: str | None = None
+    force: bool | None = False
 
 
 @router.post("/search")
@@ -76,6 +120,21 @@ def search(req: SearchRequest) -> dict[str, Any]:
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="query must not be empty")
     try:
+        if not req.force:
+            off_topic, reason = _is_off_topic(req.query)
+            if off_topic:
+                return {
+                    "query": req.query,
+                    "results": [],
+                    "attributes": {},
+                    "off_topic": True,
+                    "off_topic_reason": reason,
+                    "ambiguous": False,
+                    "message": (
+                        "That query doesn't look related to garments. Try adding a garment type, "
+                        "style, era, color, or material (e.g., '70s brown suede jacket')."
+                    ),
+                }
         ambiguous = _is_ambiguous(req.query)
         result = query_pipeline.search(
             req.query, limit=req.limit or 10, model=req.model, user_id=req.user_id
@@ -86,6 +145,7 @@ def search(req: SearchRequest) -> dict[str, Any]:
             result["ambiguous"] = True
         else:
             result["ambiguous"] = False
+        result["off_topic"] = False
         return result
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e)) from e
