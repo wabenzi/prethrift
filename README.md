@@ -4,6 +4,102 @@
 
 Multi-platform commerce app with ML-powered search.
 
+## High-Level Purpose
+Prethrift ("Vintage Vault") is a fashion discovery & personalization platform. It enriches raw, long-tail or second‑hand apparel inventory with structured ontology attributes and semantic embeddings, then serves explainable, preference‑aware search and (future) recommendations. The system emphasizes: (1) hybrid precision + recall, (2) graceful degradation when external AI is unavailable, (3) user input quality controls (ambiguity / off‑topic), and (4) stable typed contracts for multiple frontends (web, iOS).
+
+## Key Differentiators
+* Ontology + Embeddings Hybrid: Attribute overlap + semantic similarity yields interpretable relevance.
+* Deterministic Fallbacks: Hash-based image vectors & heuristics keep baseline search functional offline.
+* Input Guardrails: Ambiguity clarification and off-topic filtering (with force override) reduce noise early.
+* Explainable Path: Ranking pipeline designed so future re-rankers can surface contributing signals.
+* Contract Discipline: OpenAPI generation + drift checks enable automated TypeScript client types.
+
+## Implemented Features (Why They Matter)
+| Feature | Value |
+|---------|-------|
+| Modular FastAPI routers | Clear ownership & test isolation |
+| Ontology-driven attribute extraction | Human-auditable, stable semantics |
+| Hybrid ranking (embeddings + attributes + preferences) | Balanced recall & precision, personalization |
+| Ambiguity detection & clarification | Reduces wasted queries, improves intent capture |
+| Off-topic heuristic filter + override | Protects result quality, allows power-user bypass |
+| Deterministic image feature hashing | Zero external dependency baseline |
+| OpenAPI spec + drift check | Prevents silent contract breakage |
+| Pre-commit (Ruff, mypy) & pytest suites | Continuous code health |
+
+## Roadmap Snapshot
+Short-term: Clarification tests; metrics (ambiguity/off-topic rates); moderation schema fields; TS client generation pipeline.
+
+Mid-term: Preference decay & diversity; pluggable vision encoder; vector index (FAISS / Qdrant) behind interface; multi-stage retrieval.
+
+Long-term: Learned re-ranker; style clustering personas; advanced moderation tiers; experimentation framework; observability dashboards.
+
+## Frontend Integration (TypeScript Web)
+1. Generate OpenAPI JSON (script) → run openapi-typescript to produce `src/api/types.ts`.
+2. Build a typed fetch wrapper with abort + debounce (search keystrokes).
+3. Interpret response fields:
+	 * `clarification` present → show inline prompt with Accept/Refine actions.
+	 * `off_topic` true → show notice + "Search anyway" (resend with `force=true`).
+4. Display results with attribute highlights & optional "Why shown" expandable explanation.
+5. Persist lightweight analytics events (issued, clarified, forced, result_click) for tuning.
+
+## Suggested Project Structure Enhancements
+Backend (incremental refactor):
+```
+backend/app/
+	api/            # routers
+	schemas/        # pydantic models
+	services/       # ontology, ranking, features, moderation
+	repositories/   # DB access abstractions
+	core/           # config, clients, logging
+```
+Frontend (web):
+```
+src/
+	api/            # generated types + client
+	features/search/
+	components/
+	models/
+	lib/            # utilities (fetch, debounce)
+	styles/
+```
+
+## Additional Feature Ideas
+* Visual similarity search (upload / image-to-image) once pluggable encoder added.
+* Explainability panel: show top contributing attributes & semantic score.
+* Saved searches + delta alerts for newly matching items.
+* Style profile clustering ("Casual Minimalist" tag) to drive curated carousels.
+* Session-aware re-ranking (short-term vs long-term intent separation).
+
+## Alternative / Complementary Search Approaches
+* Attribute-first candidate filter + semantic re-rank (latency optimization).
+* Sparse (BM25) + dense fusion via reciprocal rank fusion.
+* Graph similarity (shared attribute / co-engagement edges) for related items.
+* Learned gradient-boosted re-ranker with rich feature vector (token overlap, cosine, Jaccard, preference distance, freshness).
+
+## UI / UX Notes (Search & Results)
+* Chips for recognized attributes inside the search bar (removable tokens).
+* Ambiguity banner: selectable interpretations (e.g., "blazer" vs "sport coat").
+* Off-topic interstitial with refine or override path.
+* Result cards: highlight matched color/material; mini "Why" toggle.
+* Empty states: suggestions from ontology neighbors; clarify prompt gating before search.
+
+## Moderation & Guardrails
+Current: Heuristic ambiguity + off-topic detection; user force override for benign off-topic.
+Planned: Moderation flags (e.g., `moderation_required`), layered classifier, disallowed category block (no override). Avoid trivializing harmful input; instead return a neutral guidance panel (never substituting with unrelated images that could be perceived as minimizing severity).
+
+## Architecture Decision Records (ADRs)
+Stored under `docs/adr`. See `0001-architecture-overview.md` for baseline architecture rationale and future evolution path.
+
+## Contribution Quick Wins
+* Add tests covering clarification flow.
+* Introduce metrics counters (Prometheus) for query quality events.
+* Refactor ranking components into `services/`.
+* Generate TS types in CI and fail on drift.
+* Implement pluggable vision encoder interface & stub.
+
+---
+This extended section documents the platform vision, current differentiators, and a pragmatic path toward a scalable, explainable fashion discovery engine.
+
 ## Structure
 Backend and frontend are modularized for clarity.
 
