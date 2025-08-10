@@ -41,3 +41,12 @@ pip install pre-commit  # (or use existing venv)
 pre-commit install
 ```
 Hooks: Ruff (fix & format), mypy, flake8 (extra eyes), basic hygiene checks.
+
+## Optional OpenAI End-to-End Test
+A cost-incurring integration test (`test_e2e_openai_search.py`) is skipped by default. Run it manually with real API access:
+```
+export OPENAI_API_KEY=sk-...
+export RUN_OPENAI_E2E=1
+pytest -q backend/tests/test_e2e_openai_search.py
+```
+Or trigger the manual workflow_dispatch job in GitHub Actions (requires `OPENAI_API_KEY` secret). See `backend/README-e2e.md` for details.
