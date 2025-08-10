@@ -71,6 +71,14 @@ transcribe: | $(VENV_DIR)
 	@echo "$(BLUE)[transcribe]$(RESET) $(FILE)"
 	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/app/transcribe-troy.py $(FILE)
 
+extract-prefs: | $(VENV_DIR)
+	@if [ -z "$(TEXT)" ]; then echo 'Usage: make extract-prefs TEXT="conversation text"'; exit 1; fi
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python -c "from backend.app.openai_extractor import extract_preferences;import json;print(json.dumps(extract_preferences(\"$(TEXT)\"), indent=2))"
+
+describe-images: | $(VENV_DIR)
+	@echo "$(BLUE)[describe]$(RESET) Generating garment descriptions"
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python -m backend.app.describe_images --images-dir design/images --out-dir design/text $(ARGS)
+
 ci: lint type test
 	@echo "$(GREEN)[ci] All checks passed.$(RESET)"
 
