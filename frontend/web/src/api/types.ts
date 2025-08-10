@@ -65,7 +65,13 @@ export interface SearchResultItem {
   garment_id?: any;
   score?: any;
   title?: any;
+  brand?: any;
+  price?: any;
+  currency?: any;
+  image_path?: any;
+  description?: any;
   attributes?: any;
+  explanation?: any;
 }
 export interface ValidationError {
   loc: any[];

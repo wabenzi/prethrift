@@ -115,11 +115,17 @@ class SearchRequest(BaseModel):
     force: bool | None = False
 
 
-class SearchResultItem(BaseModel):  # minimal placeholder; refine as schema stabilizes
+class SearchResultItem(BaseModel):  # expanded garment representation
     garment_id: int | None = None
     score: float | None = None
     title: str | None = None
-    attributes: dict[str, Any] | None = None
+    brand: str | None = None
+    price: float | None = None
+    currency: str | None = None
+    image_path: str | None = None
+    description: str | None = None
+    attributes: list[dict[str, Any]] | None = None
+    explanation: dict[str, Any] | None = None
 
 
 class SearchResponse(BaseModel):

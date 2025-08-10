@@ -303,9 +303,12 @@ def search(
                 "garment_id": r.garment_id,
                 "score": r.score,
                 "title": r.title,
+                "brand": None,  # brand not currently loaded in RankedGarment (future enhancement)
+                "price": None,
+                "currency": None,
+                "image_path": None,
                 "description": r.description,
                 "explanation": r.explanation,
-                # Provide flattened attribute family/value pairs with stored confidence if available
                 "attributes": [
                     {
                         "family": ga.attribute.family,
