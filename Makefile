@@ -96,7 +96,11 @@ metrics: | $(VENV_DIR)
 
 openapi: | $(VENV_DIR)
 	@echo "$(BLUE)[openapi]$(RESET) Generating OpenAPI spec"
-	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/scripts/generate_openapi.py --out-dir backend/architecture
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && PYTHONPATH=. python backend/scripts/generate_openapi.py --out-dir backend/architecture
+
+types: openapi
+	@echo "$(BLUE)[types]$(RESET) Generating TypeScript API types & client"
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && PYTHONPATH=. python backend/scripts/generate_typescript_client.py
 
 diagram diagrams: | $(VENV_DIR)
 	@echo "$(BLUE)[plantuml]$(RESET) (Optional) Render .puml -> .png/.svg if plantuml installed"

@@ -115,7 +115,25 @@ class SearchRequest(BaseModel):
     force: bool | None = False
 
 
-@router.post("/search")
+class SearchResultItem(BaseModel):  # minimal placeholder; refine as schema stabilizes
+    garment_id: int | None = None
+    score: float | None = None
+    title: str | None = None
+    attributes: dict[str, Any] | None = None
+
+
+class SearchResponse(BaseModel):
+    query: str | None = None
+    results: list[SearchResultItem] | None = None
+    attributes: dict[str, Any] | None = None
+    ambiguous: bool | None = None
+    clarification: str | None = None
+    off_topic: bool | None = None
+    off_topic_reason: str | None = None
+    message: str | None = None
+
+
+@router.post("/search", response_model=SearchResponse)
 def search(req: SearchRequest) -> dict[str, Any]:
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="query must not be empty")
