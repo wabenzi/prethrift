@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors  # type: ignore[import-untyped]
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
