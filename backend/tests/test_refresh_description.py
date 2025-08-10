@@ -44,8 +44,9 @@ def client(monkeypatch):
     def fake_get_client():
         return dummy_client
 
-    # patch module level get_client
+    # Patch module-level get_client on main (legacy) & adjust user_profile symbols used by new path
     from backend.app import main as main_mod
+    from backend.app.api import user_profile as user_profile_mod
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setattr(main_mod, "get_client", fake_get_client)
@@ -58,7 +59,9 @@ def client(monkeypatch):
         return [0.1, 0.2, 0.3]
 
     monkeypatch.setattr(main_mod, "describe_image", fake_describe_image)
-    monkeypatch.setattr(main_mod, "embed_text", fake_embed_text)
+    # Patch user_profile route dependencies
+    monkeypatch.setattr(user_profile_mod, "describe_image", fake_describe_image)
+    monkeypatch.setattr(user_profile_mod, "embed_text_cached", lambda _t: [0.1, 0.2, 0.3])
 
     c = TestClient(app)
     return c, garment_id
@@ -66,7 +69,7 @@ def client(monkeypatch):
 
 def test_refresh_description_first_call(client):
     c, garment_id = client
-    r = c.post("/garments/refresh-description", json={"garment_id": garment_id})
+    r = c.post("/user/garments/refresh-description", json={"garment_id": garment_id})
     assert r.status_code == 200, r.text
     data: dict[str, Any] = r.json()
     assert data["garment_id"] == garment_id
@@ -74,7 +77,7 @@ def test_refresh_description_first_call(client):
     assert data["cached"] is False
 
     # Second call should now be cached
-    r2 = c.post("/garments/refresh-description", json={"garment_id": garment_id})
+    r2 = c.post("/user/garments/refresh-description", json={"garment_id": garment_id})
     assert r2.status_code == 200
     data2 = r2.json()
     assert data2["cached"] is True
@@ -83,10 +86,10 @@ def test_refresh_description_first_call(client):
 def test_refresh_description_overwrite(client):
     c, garment_id = client
     # initial
-    c.post("/garments/refresh-description", json={"garment_id": garment_id})
+    c.post("/user/garments/refresh-description", json={"garment_id": garment_id})
     # overwrite
     r = c.post(
-        "/garments/refresh-description",
+        "/user/garments/refresh-description",
         json={"garment_id": garment_id, "overwrite": True},
     )
     assert r.status_code == 200

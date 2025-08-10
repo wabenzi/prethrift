@@ -1,0 +1,64 @@
+@startuml Architecture Overview
+title Prethrift High-Level Architecture
+skinparam componentStyle rectangle
+
+package "Client Apps" {
+  [Web (React)] as Web
+  [iOS (SwiftUI)] as IOS
+}
+
+node "Backend (FastAPI)" {
+  component "main.py\n(app bootstrap)" as Main
+  package Routers {
+    [search.py]Next optional ideas: add PyYAML to requirements, CI step to assert openapi.json up to date, or render diagrams in README. as Search
+    [inventory.py] as Inventory
+    [ingest.py] as Ingest
+    [user_profile.py] as UserProfile
+    [feedback.py] as Feedback
+  }
+  component "refresh_description.py" as RefreshCore
+  component "inventory_processing.py" as InvProcessing
+  component "ontology.py" as Ontology
+  component "query_pipeline.py" as QueryPipeline
+  component "openai_extractor.py" as PrefExtractor
+  component "describe_images.py" as DescribeImages
+  component "core.py\n(OpenAI client + embed cache)" as Core
+  database "DB (Postgres/SQLite)" as DB
+}
+
+cloud "OpenAI API" as OpenAI
+
+Web --> Main : HTTPS REST
+IOS --> Main : HTTPS REST
+
+Main --> Search
+Main --> Inventory
+Main --> Ingest
+Main --> UserProfile
+Main --> Feedback
+
+UserProfile --> Core
+UserProfile --> RefreshCore
+RefreshCore --> DescribeImages : describe_image()
+RefreshCore --> Core : embed_text_cached()
+RefreshCore --> Ontology : classify + confidence
+
+Search --> QueryPipeline
+QueryPipeline --> PrefExtractor : extract_preferences()
+QueryPipeline --> Core : embed_text_cached()
+QueryPipeline --> DB
+
+Inventory --> InvProcessing
+InvProcessing --> DB
+Ingest --> DB
+Feedback --> DB
+UserProfile --> DB
+RefreshCore --> DB
+
+Core --> OpenAI : chat/embeddings
+PrefExtractor --> OpenAI
+DescribeImages --> OpenAI
+
+DB -[hidden]down- OpenAI
+
+@enduml

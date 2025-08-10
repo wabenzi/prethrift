@@ -1,8 +1,17 @@
 import base64
+import sys
+from pathlib import Path
 
 import numpy as np
-from backend.app.main import app
 from fastapi.testclient import TestClient
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT / "backend") not in sys.path:
+    sys.path.insert(0, str(ROOT / "backend"))
+try:
+    from app.main import app  # type: ignore
+except Exception:  # pragma: no cover
+    from backend.app.main import app  # type: ignore
 
 
 def _fake_png_bytes() -> bytes:
@@ -19,6 +28,8 @@ def test_ingest_requires_image():
 
 
 def test_ingest_success(monkeypatch, tmp_path):
+    # isolate DB per test
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path/'db.sqlite'}")
     client = TestClient(app)
 
     # Provide lightweight fake image_to_feature to bypass heavy torch import

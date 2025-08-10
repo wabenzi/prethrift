@@ -1,0 +1,84 @@
+@startuml Endpoint Sequences
+' Global skinparams
+skinparam sequenceArrowThickness 1
+skinparam sequenceParticipant underline
+skinparam sequenceMessageAlign center
+
+' Participants reused across sequences
+participant Client
+participant "FastAPI Router" as Router
+participant "Core (OpenAI)" as Core
+participant "DescribeImages" as DescribeImages
+participant "Ontology" as Ontology
+participant "DB" as DB
+participant "OpenAI API" as OpenAI
+
+== /search ==
+Client->Router: POST /search
+activate Router
+Router->DB: load garments
+Router->Core: embed_text_cached(query)
+Core->OpenAI: embeddings.create
+OpenAI-->Core: vector
+Router->DB: load user prefs
+Router->Core: embed_text_cached(pref text)
+Core->OpenAI: embeddings.create
+OpenAI-->Core: vector
+Router->DB: scoring + ranking
+Router-->Client: results
+deactivate Router
+
+== /user/preferences/extract ==
+Client->Router: POST /user/preferences/extract
+activate Router
+Router->Core: (optional) ensure client
+Router->OpenAI: chat.completions (preference prompt)
+OpenAI-->Router: structured JSON
+Router-->Client: families/likes/dislikes
+deactivate Router
+
+== /user/garments/refresh-description ==
+Client->Router: POST /user/garments/refresh-description
+activate Router
+Router->DB: fetch garment
+alt cached & !overwrite
+  Router-->Client: cached description
+else generate
+  Router->DescribeImages: describe_image(client, path)
+  DescribeImages->OpenAI: chat.completions (vision)
+  OpenAI-->DescribeImages: description text
+  Router->Core: embed_text_cached(desc)
+  Core->OpenAI: embeddings.create
+  OpenAI-->Core: vector
+  Router->Ontology: classify_basic_cached(desc)
+  Ontology-->Router: families
+  Router->DB: upsert description + attributes
+  Router-->Client: new description
+end
+deactivate Router
+
+== /feedback ==
+Client->Router: POST /feedback
+activate Router
+Router->DB: record InteractionEvent
+Router->DB: update/create UserPreference weights
+Router-->Client: status ok
+Router->Core: (invalidate user embedding cache)
+Core-->Core: cleared
+deactivate Router
+
+== /garments/ingest ==
+Client->Router: POST /garments/ingest
+activate Router
+Router->DB: insert or return existing garment
+Router-->Client: garment_id
+Deactivate Router
+
+== /inventory/upload (simplified) ==
+Client->Router: POST /inventory/upload
+activate Router
+Router->DB: persist InventoryImage + items
+Router-->Client: upload_id/meta
+Deactivate Router
+
+@enduml

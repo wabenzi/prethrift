@@ -16,3 +16,4 @@ pillow
 scikit-learn
 jsonschema
 types-jsonschema
+PyYAML

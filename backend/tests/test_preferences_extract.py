@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 def test_preferences_extract_empty():
     client = TestClient(app)
-    resp = client.post("/preferences/extract", json={"conversation": "   "})
+    resp = client.post("/user/preferences/extract", json={"conversation": "   "})
     assert resp.status_code == 400
 
 
@@ -29,7 +29,7 @@ def test_preferences_extract_success(monkeypatch):
     monkeypatch.setattr(openai_extractor, "extract_preferences", fake_extract)
 
     resp = client.post(
-        "/preferences/extract",
+        "/user/preferences/extract",
         json={"conversation": "I really like casual shirt styles."},
     )
     assert resp.status_code == 200, resp.text

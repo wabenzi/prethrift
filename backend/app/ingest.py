@@ -12,12 +12,29 @@ from .db_models import AttributeValue, Base, Garment, GarmentAttribute
 from .image_features import image_to_feature
 from .ontology import normalize
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./prethrift.db")
-_engine = create_engine(DATABASE_URL, future=True)
+_ENGINE = None  # lazily initialized
+_ENGINE_URL = None
+
+
+def get_engine():
+    """Return a (possibly re-created) SQLAlchemy engine honoring current DATABASE_URL.
+
+    Tests mutate DATABASE_URL at runtime (per-test temp DB). The original implementation
+    captured the URL at import time causing subsequent tests to operate on stale engines.
+    This helper recreates the engine if the env var changed.
+    """
+    global _ENGINE, _ENGINE_URL
+    url = os.getenv("DATABASE_URL", "sqlite:///./prethrift.db")
+    # Re-create engine if first use or env var changed
+    if _ENGINE is None or url != _ENGINE_URL:
+        _ENGINE = create_engine(url, future=True)
+        _ENGINE_URL = url
+        Base.metadata.create_all(_ENGINE)
+    return _ENGINE
 
 
 def init_db() -> None:
-    Base.metadata.create_all(_engine)
+    get_engine()  # ensures metadata created
 
 
 def get_or_create_attribute(session: Session, family: str, value: str) -> AttributeValue:
@@ -46,8 +63,8 @@ def ingest_garment(
 
     Returns garment id.
     """
-    init_db()
-    with Session(_engine) as session:
+    engine = get_engine()
+    with Session(engine) as session:
         # Check duplicate
         existing = session.scalars(
             select(Garment).where(Garment.external_id == external_id)

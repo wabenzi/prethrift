@@ -27,6 +27,7 @@ YELLOW=\033[33m
 RESET=\033[0m
 
 .PHONY: install update lint format type test dev run transcribe clean ci help
+ .PHONY: openapi diagram diagrams
 
 $(VENV_DIR): $(REQ)
 	@echo "$(BLUE)[venv]$(RESET) Creating virtual environment"
@@ -81,6 +82,18 @@ describe-images: | $(VENV_DIR)
 
 ci: lint type test
 	@echo "$(GREEN)[ci] All checks passed.$(RESET)"
+
+openapi: | $(VENV_DIR)
+	@echo "$(BLUE)[openapi]$(RESET) Generating OpenAPI spec"
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/scripts/generate_openapi.py --out-dir backend/architecture
+
+diagram diagrams: | $(VENV_DIR)
+	@echo "$(BLUE)[plantuml]$(RESET) (Optional) Render .puml -> .png/.svg if plantuml installed"
+	@if command -v plantuml >/dev/null 2>&1; then \
+	  plantuml backend/architecture/*.puml; \
+	else \
+	  echo "PlantUML not installed; skipping render (files in backend/architecture)"; \
+	fi
 
 clean:
 	@echo "$(YELLOW)[clean]$(RESET) Removing venv and caches"

@@ -111,7 +111,39 @@ def extract_preferences(conversation: str, model: str = "gpt-4o-mini") -> dict[s
     if _validator is not None:
         errors = sorted(_validator.iter_errors(data), key=lambda e: e.path)
         if errors:
-            msgs = [f"{list(err.path)}: {err.message}" for err in errors]
-            raise ValidationError("; ".join(msgs))
-
+            # Attempt a lenient fallback: map any top-level unknown families into likes
+            repaired: dict[str, Any] = {
+                "likes": {},
+                "dislikes": {},
+                "constraints": {},
+                "uncertain": [],
+            }
+            # Heuristic: flatten single attributes into style/color_primary buckets
+            for k, v in list(data.items()):
+                if k in ("likes", "dislikes") and isinstance(v, dict):
+                    repaired[k].update(
+                        {
+                            fam: vals
+                            for fam, vals in v.items()
+                            if fam
+                            in {
+                                "category",
+                                "fit",
+                                "material",
+                                "color_primary",
+                                "pattern",
+                                "style",
+                                "season",
+                                "occasion",
+                            }
+                            and isinstance(vals, list)
+                        }
+                    )
+                elif k in ("band", "theme"):
+                    repaired["likes"].setdefault("style", []).append(str(k))
+                elif k == "color" and isinstance(v, str):
+                    repaired["likes"].setdefault("color_primary", []).append(v)
+                elif k == "type" and isinstance(v, str):
+                    repaired["likes"].setdefault("category", []).append(v)
+            data = repaired
     return _postprocess(data)

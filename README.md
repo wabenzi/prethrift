@@ -5,10 +5,44 @@
 Multi-platform commerce app with ML-powered search.
 
 ## Structure
-- backend: FastAPI, Postgres, vector DB
-- frontend/web: React + TypeScript
-- frontend/ios: SwiftUI
-- design: wireframes, logo, app icon
+Backend and frontend are modularized for clarity.
+
+### Backend (FastAPI)
+`backend/app` key modules:
+* `main.py` – minimal bootstrap (creates FastAPI app, includes routers, root & cache admin only)
+* `api/` – feature routers:
+	* `search.py` – semantic search endpoint
+	* `inventory.py` – inventory image upload, batch processing, stats
+	* `ingest.py` – single garment ingest endpoint
+	* `user_profile.py` – user preference extraction & garment description refresh
+	* `feedback.py` – interaction feedback adjusting preference weights
+* `refresh_description.py` – shared core logic for refreshing garment descriptions (used by routers)
+* `inventory_processing.py` – image persistence, optimization, multi‑garment description helpers, color stats
+* `inventory_utils.py` – utility helpers (safe attribute upsert, image file persistence)
+* `describe_images.py` – OpenAI vision description + embedding utilities & CLI script
+* `core.py` – OpenAI client + embedding cache helpers
+* `ontology.py` (and related) – attribute classification & confidence scoring
+* `db_models.py` – SQLAlchemy ORM models
+
+Tests live in `backend/tests` and now target the new `/user/...` paths (legacy root paths removed).
+
+### Frontend
+* `frontend/web` – React + TypeScript (Vite)
+* `frontend/ios` – SwiftUI app scaffold
+
+### Design
+Assets (logos, icons, wireframes) under `design/`.
+
+## Architecture Diagrams
+High-level diagrams (kept in `backend/architecture`):
+
+### Component Overview
+![Architecture](backend/architecture/architecture.puml)
+
+### Sequence Flows
+![Sequences](backend/architecture/sequences.puml)
+
+These `.puml` sources render automatically in many IDE plugins. For GitHub rendering you can use a PlantUML action or manually export PNG/SVG and commit alongside if desired.
 
 ## Makefile Commands
 Common developer tasks:
@@ -50,3 +84,16 @@ export RUN_OPENAI_E2E=1
 pytest -q backend/tests/test_e2e_openai_search.py
 ```
 Or trigger the manual workflow_dispatch job in GitHub Actions (requires `OPENAI_API_KEY` secret). See `backend/README-e2e.md` for details.
+
+## Recent Refactors
+* Consolidated refresh-description logic into `refresh_description.py`.
+* Moved ingest endpoint out of `main.py` into `api/ingest.py`.
+* Trimmed `main.py` to a minimal bootstrap; removed legacy compatibility routes.
+* Added tests for `inventory_utils` and new `/feedback` router path.
+* Updated tests to use `/user/garments/refresh-description` and `/user/preferences/extract` paths.
+
+## Running Tests
+```
+make test
+```
+All current tests (excluding optional OpenAI E2E) should pass: see CI badge.

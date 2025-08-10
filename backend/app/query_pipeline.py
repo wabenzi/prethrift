@@ -186,7 +186,7 @@ def _load_user_negative_embedding(user_id: str | None) -> list[float] | None:
 
 def retrieve_and_rank(
     parsed: ParsedQuery, limit: int = 10, user_id: str | None = None
-) -> list[RankedGarment]:
+) -> tuple[list[RankedGarment], dict[int, list]]:
     engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
     Base.metadata.create_all(engine)
     with Session(engine) as session:
@@ -194,12 +194,13 @@ def retrieve_and_rank(
         garments = session.scalars(select(Garment)).all()
         # eager load attributes
         for g in garments:
-            # access relationship to load
             _ = g.attributes
         user_pref_weights = _load_user_preferences(user_id)
         user_positive_emb = _load_user_positive_embedding(user_id)
         user_negative_emb = _load_user_negative_embedding(user_id)
+
         results: list[RankedGarment] = []
+        garment_attr_map: dict[int, list] = {g.id: list(g.attributes) for g in garments}
         for g in garments:
             components: dict[str, float] = {}
             contributions: dict[str, float] = {}
@@ -264,6 +265,14 @@ def retrieve_and_rank(
                 "weights": weights_meta,
                 "contributions": contributions,
                 "final_score": score,
+                "garment_attributes": [
+                    {
+                        "family": ga.attribute.family,
+                        "value": ga.attribute.value,
+                        "confidence": ga.confidence,
+                    }
+                    for ga in garment_attr_map.get(g.id, [])
+                ],
             }
             results.append(
                 RankedGarment(
@@ -274,8 +283,8 @@ def retrieve_and_rank(
                     explanation=explanation,
                 )
             )
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
+    results.sort(key=lambda r: r.score, reverse=True)
+    return results[:limit], garment_attr_map
 
 
 def search(
@@ -285,7 +294,7 @@ def search(
     user_id: str | None = None,
 ) -> dict:
     parsed = parse_query(text, model=model)
-    ranked = retrieve_and_rank(parsed, limit=limit, user_id=user_id)
+    ranked, garment_attr_map = retrieve_and_rank(parsed, limit=limit, user_id=user_id)
     return {
         "query": parsed.raw,
         "attributes": parsed.attributes,
@@ -296,6 +305,15 @@ def search(
                 "title": r.title,
                 "description": r.description,
                 "explanation": r.explanation,
+                # Provide flattened attribute family/value pairs with stored confidence if available
+                "attributes": [
+                    {
+                        "family": ga.attribute.family,
+                        "value": ga.attribute.value,
+                        "confidence": ga.confidence,
+                    }
+                    for ga in garment_attr_map.get(r.garment_id, [])
+                ],
             }
             for r in ranked
         ],

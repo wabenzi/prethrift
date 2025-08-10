@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     JSON,
@@ -36,10 +36,47 @@ class Garment(Base):
     image_embedding: Mapped[list[float] | None] = mapped_column(JSON)
     description: Mapped[str | None] = mapped_column(String(2048))
     description_embedding: Mapped[list[float] | None] = mapped_column(JSON)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     attributes: Mapped[list[GarmentAttribute]] = relationship(
         back_populates="garment", cascade="all,delete-orphan"
     )
+
+
+class InventoryImage(Base):
+    """Raw inventory image (may depict multiple garments)."""
+
+    __tablename__ = "inventory_image"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    file_path: Mapped[str] = mapped_column(String(512), unique=True, index=True)
+    original_format: Mapped[str | None] = mapped_column(String(16))
+    optimized_format: Mapped[str | None] = mapped_column(String(16))
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    processed: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+
+
+class InventoryItem(Base):
+    """Individual garment interpretation extracted from an inventory image."""
+
+    __tablename__ = "inventory_item"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    image_id: Mapped[int] = mapped_column(
+        ForeignKey("inventory_image.id", ondelete="CASCADE"), index=True
+    )
+    garment_id: Mapped[int | None] = mapped_column(
+        ForeignKey("garment.id", ondelete="SET NULL"), index=True
+    )
+    slot_index: Mapped[int] = mapped_column(
+        Integer
+    )  # sequential index if multiple garments detected
+    description: Mapped[str | None] = mapped_column(String(2048))
+    description_embedding: Mapped[list[float] | None] = mapped_column(JSON)
+    attributes_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
+    color_stats: Mapped[dict | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    __table_args__ = (UniqueConstraint("image_id", "slot_index", name="uq_image_slot"),)
 
 
 class AttributeValue(Base):
@@ -75,7 +112,7 @@ class UserPreference(Base):
     weight: Mapped[float] = mapped_column(Float, default=1.0)
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
     last_updated: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC)
     )
     attribute: Mapped[AttributeValue] = relationship()
     __table_args__ = (UniqueConstraint("user_id", "attribute_value_id", name="uq_user_attr_pref"),)
@@ -91,5 +128,5 @@ class InteractionEvent(Base):
     # event_type examples: view, click, add_to_cart, purchase, dislike
     event_type: Mapped[str] = mapped_column(String(32))
     weight_delta: Mapped[float] = mapped_column(Float, default=0.0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     processed: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

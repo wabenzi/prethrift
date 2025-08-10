@@ -69,6 +69,15 @@ def combine_embeddings(vectors: list[list[float]]) -> list[float] | None:
     return [x / n for x in acc]
 
 
+def clear_all_caches() -> dict[str, int]:
+    """Evict all in-memory caches (for test / benchmarking scenarios)."""
+    qc = len(_query_embedding_cache)
+    uc = len(_user_embedding_cache)
+    _query_embedding_cache.clear()
+    _user_embedding_cache.clear()
+    return {"query_embeddings_cleared": qc, "user_embeddings_cleared": uc}
+
+
 def decay_weight(age_days: float, half_life_days: float = 30.0) -> float:
     if age_days <= 0:
         return 1.0

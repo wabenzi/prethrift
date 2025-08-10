@@ -42,6 +42,12 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           pytest -q backend/tests
+      - name: Check OpenAPI up-to-date
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python backend/scripts/generate_openapi.py --out-dir backend/architecture
+          git diff --exit-code backend/architecture/openapi.json backend/architecture/openapi.yaml || (echo "OpenAPI spec is outdated. Run generate_openapi.py and commit changes." && exit 1)
 
   frontend:
     name: Frontend (Vite React)
