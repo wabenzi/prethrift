@@ -187,6 +187,7 @@ class SearchRequest(BaseModel):
     query: str
     limit: int | None = 10
     model: str | None = None
+    user_id: str | None = None
 
 
 @app.post("/search")
@@ -194,6 +195,75 @@ def search(req: SearchRequest) -> dict[str, Any]:
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="query must not be empty")
     try:
-        return query_pipeline.search(req.query, limit=req.limit or 10, model=req.model)
+        return query_pipeline.search(
+            req.query, limit=req.limit or 10, model=req.model, user_id=req.user_id
+        )
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class FeedbackRequest(BaseModel):
+    user_id: str
+    garment_id: int
+    action: str  # like, dislike, view, click
+    weight: float | None = None
+
+
+@app.post("/feedback")
+def feedback(req: FeedbackRequest) -> dict[str, Any]:
+    action = req.action.lower().strip()
+    if action not in {"like", "dislike", "view", "click"}:
+        raise HTTPException(status_code=400, detail="invalid action")
+    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
+    Base.metadata.create_all(engine)
+    from sqlalchemy import select as _select
+
+    from .db_models import InteractionEvent, UserPreference
+
+    with Session(engine) as session:
+        garment = session.get(Garment, req.garment_id)
+        if not garment:
+            raise HTTPException(status_code=404, detail="garment not found")
+        _ = garment.attributes  # load
+        # Record raw interaction event
+        session.add(
+            InteractionEvent(
+                user_id=req.user_id,
+                garment_id=garment.id,
+                event_type=action,
+                weight_delta=req.weight or 1.0,
+            )
+        )
+        # Simple direct preference update: for LIKE increase weights, DISLIKE decrease
+        delta = 0.0
+        if action == "like":
+            delta = req.weight or 1.0
+        elif action == "dislike":
+            delta = -1.0 * (req.weight or 1.0)
+        # views/clicks produce smaller signals
+        elif action == "view":
+            delta = 0.1 * (req.weight or 1.0)
+        elif action == "click":
+            delta = 0.3 * (req.weight or 1.0)
+        if delta != 0 and garment.attributes:
+            for ga in garment.attributes:
+                av_id = ga.attribute_value_id
+                pref = session.scalar(
+                    _select(UserPreference).where(
+                        (UserPreference.user_id == req.user_id)
+                        & (UserPreference.attribute_value_id == av_id)
+                    )
+                )
+                if not pref:
+                    session.add(
+                        UserPreference(
+                            user_id=req.user_id,
+                            attribute_value_id=av_id,
+                            weight=delta,
+                            confidence=1.0,
+                        )
+                    )
+                else:
+                    pref.weight += delta
+        session.commit()
+        return {"status": "ok"}

@@ -92,7 +92,28 @@ def _attribute_overlap_score(parsed: ParsedQuery, garment: Garment) -> float:
     return score / possible
 
 
-def retrieve_and_rank(parsed: ParsedQuery, limit: int = 10) -> list[RankedGarment]:
+def _load_user_preferences(user_id: str | None) -> dict[int, float]:
+    if not user_id:
+        return {}
+    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
+    Base.metadata.create_all(engine)
+    from sqlalchemy import select as _select
+
+    from .db_models import UserPreference
+
+    prefs: dict[int, float] = {}
+    with Session(engine) as session:
+        rows = session.scalars(
+            _select(UserPreference).where(UserPreference.user_id == user_id)
+        ).all()
+        for r in rows:
+            prefs[r.attribute_value_id] = r.weight
+    return prefs
+
+
+def retrieve_and_rank(
+    parsed: ParsedQuery, limit: int = 10, user_id: str | None = None
+) -> list[RankedGarment]:
     engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
     Base.metadata.create_all(engine)
     with Session(engine) as session:
@@ -102,6 +123,7 @@ def retrieve_and_rank(parsed: ParsedQuery, limit: int = 10) -> list[RankedGarmen
         for g in garments:
             # access relationship to load
             _ = g.attributes
+        user_pref_weights = _load_user_preferences(user_id)
         results: list[RankedGarment] = []
         for g in garments:
             explanation: dict[str, float] = {}
@@ -113,6 +135,17 @@ def retrieve_and_rank(parsed: ParsedQuery, limit: int = 10) -> list[RankedGarmen
             attr_score = _attribute_overlap_score(parsed, g)
             explanation["attribute_overlap"] = attr_score
             score += 0.3 * attr_score
+            # preference score: average weight of garment attributes present in user prefs
+            if user_pref_weights and g.attributes:
+                weights = [user_pref_weights.get(ga.attribute_value_id, 0.0) for ga in g.attributes]
+                if weights:
+                    pref_score = sum(weights) / len(weights)
+                    # normalize with tanh to bound extreme values
+                    import math as _m
+
+                    bounded = _m.tanh(pref_score / 3.0)  # soft bound
+                    explanation["preference_weight"] = bounded
+                    score += 0.2 * bounded
             if score > 0:
                 results.append(
                     RankedGarment(
@@ -127,9 +160,14 @@ def retrieve_and_rank(parsed: ParsedQuery, limit: int = 10) -> list[RankedGarmen
         return results[:limit]
 
 
-def search(text: str, limit: int = 10, model: str | None = None) -> dict:
+def search(
+    text: str,
+    limit: int = 10,
+    model: str | None = None,
+    user_id: str | None = None,
+) -> dict:
     parsed = parse_query(text, model=model)
-    ranked = retrieve_and_rank(parsed, limit=limit)
+    ranked = retrieve_and_rank(parsed, limit=limit, user_id=user_id)
     return {
         "query": parsed.raw,
         "attributes": parsed.attributes,
