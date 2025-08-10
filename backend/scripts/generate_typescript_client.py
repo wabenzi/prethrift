@@ -60,8 +60,32 @@ def emit_types(spec: dict[str, Any]) -> str:
     comps = spec.get("components", {}).get("schemas", {})
     lines = [HEADER]
     for name, schema in comps.items():
-        # Ensure SearchResultItem[] becomes explicit in SearchResponse if generic any used
-        lines.append(f"export interface {name} {ts_type(schema)}")
+        body = ts_type(schema)
+        if name == "SearchResultItem" and body.startswith("{"):
+            replacements = {
+                "garment_id?: any;": "garment_id?: number;",
+                "score?: any;": "score?: number;",
+                "title?: any;": "title?: string;",
+                "brand?: any;": "brand?: string;",
+                "currency?: any;": "currency?: string;",
+                "image_path?: any;": "image_path?: string;",
+                "thumbnail_url?: any;": "thumbnail_url?: string;",
+                "price?: any;": "price?: number;",
+                "description?: any;": "description?: string;",
+                "explanation_summary?: any;": (
+                    "explanation_summary?: { top_components?: string[]; final_score?: number };"
+                ),
+            }
+            for k, v in replacements.items():
+                body = body.replace(k, v)
+            # attributes & explanation may remain broad; provide more precise shape for attributes
+            body = body.replace(
+                "attributes?: any;",
+                "attributes?: Array<{ family: string; value: string; confidence?: number }>;",
+            )
+        if name == "SearchResponse" and body.startswith("{") and "results?: any;" in body:
+            body = body.replace("results?: any;", "results?: SearchResultItem[];")
+        lines.append(f"export interface {name} {body}")
     return "\n".join(lines) + "\n"
 
 

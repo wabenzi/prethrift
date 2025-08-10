@@ -32,6 +32,10 @@ class RankedGarment:
     title: str | None
     description: str | None
     explanation: dict[str, Any]
+    brand: str | None = None
+    price: float | None = None
+    currency: str | None = None
+    image_path: str | None = None
 
 
 def _cos(a: list[float], b: list[float]) -> float:
@@ -281,6 +285,10 @@ def retrieve_and_rank(
                     title=g.title,
                     description=g.description,
                     explanation=explanation,
+                    brand=g.brand,
+                    price=g.price,
+                    currency=g.currency,
+                    image_path=g.image_path,
                 )
             )
     results.sort(key=lambda r: r.score, reverse=True)
@@ -293,6 +301,21 @@ def search(
     model: str | None = None,
     user_id: str | None = None,
 ) -> dict:
+    # local helper for lightweight clients
+    def _summarize_explanation(
+        expl: dict[str, Any],
+    ) -> dict[str, Any]:
+        if not expl:
+            return {}
+        comps = expl.get("components", {})
+        contrib = expl.get("contributions", {})
+        top_components = sorted(
+            ((k, contrib.get(k, 0.0)) for k in comps), key=lambda x: x[1], reverse=True
+        )[:3]
+        return {
+            "top_components": [k for k, _ in top_components],
+            "final_score": expl.get("final_score"),
+        }
     parsed = parse_query(text, model=model)
     ranked, garment_attr_map = retrieve_and_rank(parsed, limit=limit, user_id=user_id)
     return {
@@ -303,12 +326,16 @@ def search(
                 "garment_id": r.garment_id,
                 "score": r.score,
                 "title": r.title,
-                "brand": None,  # brand not currently loaded in RankedGarment (future enhancement)
-                "price": None,
-                "currency": None,
-                "image_path": None,
+                "brand": r.brand,
+                "price": r.price,
+                "currency": r.currency,
+                "image_path": r.image_path,
+                "thumbnail_url": (
+                    r.image_path.replace("/images/", "/thumbs/") if r.image_path else None
+                ),
                 "description": r.description,
                 "explanation": r.explanation,
+                "explanation_summary": _summarize_explanation(r.explanation),
                 "attributes": [
                     {
                         "family": ga.attribute.family,

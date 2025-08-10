@@ -53,7 +53,7 @@ export interface SearchRequest {
 }
 export interface SearchResponse {
   query?: any;
-  results?: any;
+  results?: SearchResultItem[];
   attributes?: any;
   ambiguous?: any;
   clarification?: any;
@@ -62,16 +62,18 @@ export interface SearchResponse {
   message?: any;
 }
 export interface SearchResultItem {
-  garment_id?: any;
-  score?: any;
-  title?: any;
-  brand?: any;
-  price?: any;
-  currency?: any;
-  image_path?: any;
-  description?: any;
-  attributes?: any;
+  garment_id?: number;
+  score?: number;
+  title?: string;
+  brand?: string;
+  price?: number;
+  currency?: string;
+  image_path?: string;
+  description?: string;
+  attributes?: Array<{ family: string; value: string; confidence?: number }>;
   explanation?: any;
+  thumbnail_url?: string;
+  explanation_summary?: { top_components?: string[]; final_score?: number };
 }
 export interface ValidationError {
   loc: any[];

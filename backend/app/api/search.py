@@ -126,6 +126,8 @@ class SearchResultItem(BaseModel):  # expanded garment representation
     description: str | None = None
     attributes: list[dict[str, Any]] | None = None
     explanation: dict[str, Any] | None = None
+    thumbnail_url: str | None = None
+    explanation_summary: dict[str, Any] | None = None
 
 
 class SearchResponse(BaseModel):
