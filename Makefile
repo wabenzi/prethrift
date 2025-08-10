@@ -83,6 +83,13 @@ describe-images: | $(VENV_DIR)
 ci: lint type test
 	@echo "$(GREEN)[ci] All checks passed.$(RESET)"
 
+metrics: | $(VENV_DIR)
+	@echo "$(BLUE)[metrics]$(RESET) Computing project metrics (backend/app + frontend/web/src)"
+	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/scripts/project_metrics.py --root backend/app --top 10
+	@if [ -d frontend/web/src ]; then \
+	  PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/scripts/project_metrics.py --root frontend/web/src --top 10; \
+	fi
+
 openapi: | $(VENV_DIR)
 	@echo "$(BLUE)[openapi]$(RESET) Generating OpenAPI spec"
 	@PYTHONPATH=$(PYTHONPATH) $(ACTIVATE) && python backend/scripts/generate_openapi.py --out-dir backend/architecture
