@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
@@ -36,7 +36,7 @@ def get_or_create_attribute(session: Session, family: str, value: str) -> Attrib
 def ingest_garment(
     external_id: str,
     image_path: str,
-    raw_attributes: dict[str, Iterable[str]] | None = None,
+    raw_attributes: Mapping[str, Iterable[str]] | None = None,
     title: str | None = None,
     brand: str | None = None,
     price: float | None = None,
