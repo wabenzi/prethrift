@@ -5,16 +5,35 @@ psycopg2-binary
 pgvector
 openai
 python-multipart
+boto3
+mangum
+alembic
 pytest
 pytest-cov
 ruff
 mypy
 nox
 pre-commit
-torch
-torchvision
-pillow
-scikit-learn
-jsonschema
-types-jsonschema
-PyYAML
+python-jose[cryptography]
+pydantic-settings
+redis
+transformers>=4.20.0
+torch>=2.0.0,<3.0.0
+torchvision>=0.15.0,<1.0.0
+
+# Observability and Monitoring
+structlog>=23.1.0
+# OpenTelemetry - use compatible versions with protobuf constraints
+opentelemetry-api==1.27.0
+opentelemetry-sdk==1.27.0
+opentelemetry-instrumentation-fastapi==0.48b0
+opentelemetry-instrumentation-sqlalchemy==0.48b0
+opentelemetry-instrumentation-psycopg2==0.48b0
+opentelemetry-instrumentation-boto3sqs==0.48b0
+opentelemetry-exporter-otlp==1.27.0
+# Use thrift-based Jaeger exporter to avoid protobuf conflicts
+opentelemetry-exporter-jaeger-thrift==1.21.0
+sentry-sdk[fastapi]>=1.32.0
+prometheus-client>=0.17.0
+# Force compatible protobuf version
+protobuf>=4.21.0,<5.0.0
