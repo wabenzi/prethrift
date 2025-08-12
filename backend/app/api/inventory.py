@@ -7,7 +7,6 @@ from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from sqlalchemy import create_engine
 from sqlalchemy import select as _select
 from sqlalchemy.orm import Session
 
@@ -15,7 +14,6 @@ from ..color_utils import map_rgb_to_color_name
 from ..core import embed_text_cached, get_client
 from ..db_models import (
     AttributeValue,
-    Base,
     Garment,
     InventoryImage,
     InventoryItem,
@@ -34,9 +32,10 @@ router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 
 def _ensure_inventory_tables():
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
-    return engine
+    # Use shared engine (handles Postgres/Aurora or local sqlite)
+    from ..ingest import get_engine
+
+    return get_engine()
 
 
 ## image persistence & optimization moved to inventory_processing
@@ -85,6 +84,7 @@ class InventoryUploadRequest(BaseModel):
     filename: str
     image_base64: str
     overwrite: bool = False
+    source: str | None = None
 
 
 @router.post("/upload")
@@ -95,18 +95,22 @@ def inventory_upload(data: InventoryUploadRequest) -> dict[str, Any]:
         disk_path = persist_raw_image(data.filename, data.image_base64)
         optimized_path, w, h, fmt = standardize_and_optimize(disk_path)
         img = _upsert_inventory_image(session, optimized_path, w, h, fmt, data.overwrite)
+        if data.source and img.source != data.source:
+            img.source = data.source
         session.commit()
         return {
             "image_id": img.id,
             "file_path": img.file_path,
             "width": img.width,
             "height": img.height,
+            "source": img.source,
         }
 
 
 class InventoryBatchUploadRequest(BaseModel):
     items: list[InventoryUploadRequest]
     overwrite: bool = False
+    source: str | None = None
 
 
 @router.post("/batch-upload")
@@ -120,12 +124,16 @@ def inventory_batch_upload(data: InventoryBatchUploadRequest) -> dict[str, Any]:
             img = _upsert_inventory_image(
                 session, optimized_path, w, h, fmt, data.overwrite or item.overwrite
             )
+            src_val = item.source or data.source
+            if src_val and img.source != src_val:
+                img.source = src_val
             results.append(
                 {
                     "image_id": img.id,
                     "file_path": img.file_path,
                     "width": img.width,
                     "height": img.height,
+                    "source": img.source,
                 }
             )
         session.commit()

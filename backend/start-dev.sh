@@ -84,4 +84,4 @@ echo "  • Restart backend:     docker-compose -f docker-compose.dev.yml restar
 echo "  • Connect to DB:       docker-compose -f docker-compose.dev.yml exec postgres psql -U prethrift -d prethrift"
 echo "  • Connect to Redis:    docker-compose -f docker-compose.dev.yml exec redis redis-cli"
 echo ""
-echo "📚 See DEVELOPMENT.md for detailed usage instructions"
+echo "📚 See docs/DEVELOPMENT.md for detailed usage instructions"

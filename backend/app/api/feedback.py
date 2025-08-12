@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import os
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import create_engine
 from sqlalchemy import select as _select
 from sqlalchemy.orm import Session
 
 from .. import user_state
-from ..db_models import Base, Garment
+from ..db_models import Garment
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -27,8 +24,10 @@ def feedback(req: FeedbackRequest):  # pragma: no cover
     action = req.action.lower().strip()
     if action not in {"like", "dislike", "view", "click"}:
         raise HTTPException(status_code=400, detail="invalid action")
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    # Centralized engine resolution (supports Aurora/Postgres via env + Secrets Manager)
+    from ..ingest import get_engine
+
+    engine = get_engine()
     from ..db_models import InteractionEvent, UserPreference
 
     with Session(engine) as session:

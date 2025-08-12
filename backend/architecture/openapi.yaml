@@ -21,9 +21,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Search Search Post
+                $ref: '#/components/schemas/SearchResponse'
         '422':
           description: Validation Error
           content:
@@ -91,6 +89,30 @@ paths:
                 type: object
                 title: Response Refresh Description User Garments Refresh Description
                   Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /feedback:
+    post:
+      tags:
+      - feedback
+      summary: Feedback
+      operationId: feedback_feedback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
         '422':
           description: Validation Error
           content:
@@ -281,30 +303,6 @@ paths:
                 additionalProperties: true
                 type: object
                 title: Response Inventory Stats Inventory Stats Get
-  /feedback:
-    post:
-      tags:
-      - feedback
-      summary: Feedback
-      operationId: feedback_feedback_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FeedbackRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /garments/ingest:
     post:
       tags:
@@ -341,27 +339,32 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /:
     get:
-      summary: Read Root
-      operationId: read_root__get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /admin/cache/clear:
-    post:
-      summary: Clear Caches
-      operationId: clear_caches_admin_cache_clear_post
+      summary: Root
+      operationId: root__get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                additionalProperties: true
+                additionalProperties:
+                  type: string
                 type: object
-                title: Response Clear Caches Admin Cache Clear Post
+                title: Response Root  Get
+  /admin/clear-embedding-cache:
+    post:
+      summary: Clear Embedding
+      operationId: clear_embedding_admin_clear_embedding_cache_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Clear Embedding Admin Clear Embedding Cache Post
 components:
   schemas:
     FeedbackRequest:
@@ -550,10 +553,132 @@ components:
           - type: string
           - type: 'null'
           title: User Id
+        force:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Force
+          default: false
       type: object
       required:
       - query
       title: SearchRequest
+    SearchResponse:
+      properties:
+        query:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Query
+        results:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/SearchResultItem'
+            type: array
+          - type: 'null'
+          title: Results
+        attributes:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Attributes
+        ambiguous:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Ambiguous
+        clarification:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clarification
+        off_topic:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Off Topic
+        off_topic_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Off Topic Reason
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+      type: object
+      title: SearchResponse
+    SearchResultItem:
+      properties:
+        garment_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Garment Id
+        score:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Score
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        brand:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Brand
+        price:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Price
+        currency:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Currency
+        image_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image Path
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        attributes:
+          anyOf:
+          - items:
+              additionalProperties: true
+              type: object
+            type: array
+          - type: 'null'
+          title: Attributes
+        explanation:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Explanation
+        thumbnail_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Thumbnail Url
+        explanation_summary:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Explanation Summary
+      type: object
+      title: SearchResultItem
     ValidationError:
       properties:
         loc:

@@ -1,0 +1,421 @@
+{
+  "demo_metadata": {
+    "timestamp": "2025-08-11T02:27:12.707955+00:00",
+    "demo_garments_count": 5,
+    "database_url": "postgresql://localhost/prethrift_dev"
+  },
+  "text_search": {
+    "blue wide leg jeans with stars": {
+      "matches": 6,
+      "search_time_ms": 15.418052673339844,
+      "top_results": [
+        {
+          "title": "Blue Denim Jeans",
+          "confidence": 0.6666666666666666,
+          "category": null,
+          "color": null
+        },
+        {
+          "title": "Wide-Leg Star Appliqu\u00e9 Jeans",
+          "confidence": 0.5,
+          "category": "pants",
+          "color": null
+        },
+        {
+          "title": "Red Cotton T-Shirt",
+          "confidence": 0.16666666666666666,
+          "category": null,
+          "color": null
+        }
+      ]
+    },
+    "colorful geometric pattern dress": {
+      "matches": 4,
+      "search_time_ms": 3.454923629760742,
+      "top_results": [
+        {
+          "title": "Geometric Pattern A-Line Dress",
+          "confidence": 0.75,
+          "category": "dress",
+          "color": null
+        },
+        {
+          "title": "Orange Floral Pattern Dress",
+          "confidence": 0.5,
+          "category": "dress",
+          "color": null
+        },
+        {
+          "title": "White Summer Dress",
+          "confidence": 0.25,
+          "category": null,
+          "color": null
+        }
+      ]
+    },
+    "cream graphic t-shirt with eagles": {
+      "matches": 5,
+      "search_time_ms": 4.719734191894531,
+      "top_results": [
+        {
+          "title": "Red Cotton T-Shirt",
+          "confidence": 0.4,
+          "category": null,
+          "color": null
+        },
+        {
+          "title": "Blue Denim Jeans",
+          "confidence": 0.2,
+          "category": null,
+          "color": null
+        },
+        {
+          "title": "Black Leather Jacket",
+          "confidence": 0.2,
+          "category": null,
+          "color": null
+        }
+      ]
+    },
+    "orange summer dress": {
+      "matches": 4,
+      "search_time_ms": 3.7229061126708984,
+      "top_results": [
+        {
+          "title": "White Summer Dress",
+          "confidence": 0.6666666666666666,
+          "category": null,
+          "color": null
+        },
+        {
+          "title": "Blue Floral Summer Dress",
+          "confidence": 0.6666666666666666,
+          "category": "dress",
+          "color": null
+        },
+        {
+          "title": "Orange Floral Pattern Dress",
+          "confidence": 0.6666666666666666,
+          "category": "dress",
+          "color": null
+        }
+      ]
+    },
+    "casual graphic shirt": {
+      "matches": 4,
+      "search_time_ms": 3.629922866821289,
+      "top_results": [
+        {
+          "title": "Flat Mars Graphic Shirt",
+          "confidence": 0.6666666666666666,
+          "category": "shoes",
+          "color": null
+        },
+        {
+          "title": "Blue and Grey Casual Shirts Set",
+          "confidence": 0.6666666666666666,
+          "category": null,
+          "color": null
+        },
+        {
+          "title": "Red Cotton T-Shirt",
+          "confidence": 0.3333333333333333,
+          "category": null,
+          "color": null
+        }
+      ]
+    }
+  },
+  "visual_similarity": {},
+  "ontology_extraction": {
+    "baggy_jeans": {
+      "extracted_properties": {
+        "subcategory": {
+          "value": "jeans",
+          "confidence": 0.75
+        },
+        "sleeve_length": {
+          "value": "wide",
+          "confidence": 0.75
+        },
+        "fit": {
+          "value": "loose",
+          "confidence": 0.55
+        },
+        "category": {
+          "value": "pants",
+          "confidence": 0.55
+        }
+      },
+      "expected_properties": {
+        "category": "bottoms",
+        "subcategory": "jeans",
+        "primary_color": "blue",
+        "style": "wide-leg",
+        "fit": "relaxed",
+        "season": "spring",
+        "occasion": "casual"
+      },
+      "accuracy": 0.14285714285714285,
+      "matches": 1,
+      "total_expected": 7
+    },
+    "pattern_dress": {
+      "extracted_properties": {
+        "category": {
+          "value": "dress",
+          "confidence": 0.75
+        },
+        "subcategory": {
+          "value": "a-line",
+          "confidence": 0.55
+        },
+        "pattern": {
+          "value": "geometric",
+          "confidence": 0.8
+        }
+      },
+      "expected_properties": {
+        "category": "dresses",
+        "subcategory": "a-line",
+        "primary_color": "blue",
+        "secondary_color": "red",
+        "pattern": "geometric",
+        "style": "bohemian",
+        "season": "summer",
+        "occasion": "casual"
+      },
+      "accuracy": 0.25,
+      "matches": 2,
+      "total_expected": 8
+    },
+    "queen_tshirt": {
+      "extracted_properties": {
+        "pattern": {
+          "value": "graphic",
+          "confidence": 0.8
+        },
+        "category": {
+          "value": "shirt",
+          "confidence": 0.55
+        },
+        "subcategory": {
+          "value": "t-shirt",
+          "confidence": 0.55
+        }
+      },
+      "expected_properties": {
+        "category": "tops",
+        "subcategory": "t-shirt",
+        "primary_color": "cream",
+        "style": "graphic",
+        "fit": "relaxed",
+        "season": "summer",
+        "occasion": "casual"
+      },
+      "accuracy": 0.14285714285714285,
+      "matches": 1,
+      "total_expected": 7
+    },
+    "orange_dress": {
+      "extracted_properties": {
+        "category": {
+          "value": "dress",
+          "confidence": 0.75
+        },
+        "color_primary": {
+          "value": "orange",
+          "confidence": 0.8
+        }
+      },
+      "expected_properties": {
+        "category": "dresses",
+        "primary_color": "orange",
+        "pattern": "floral",
+        "season": "summer",
+        "occasion": "casual"
+      },
+      "accuracy": 0.0,
+      "matches": 0,
+      "total_expected": 5
+    },
+    "mars_shirt": {
+      "extracted_properties": {
+        "category": {
+          "value": "shoes",
+          "confidence": 0.55
+        },
+        "pattern": {
+          "value": "graphic",
+          "confidence": 0.8
+        }
+      },
+      "expected_properties": {
+        "category": "tops",
+        "subcategory": "shirt",
+        "style": "graphic",
+        "occasion": "casual"
+      },
+      "accuracy": 0.0,
+      "matches": 0,
+      "total_expected": 4
+    }
+  },
+  "hybrid_search": {
+    "Find blue casual wear": {
+      "query": "blue casual",
+      "filters": {
+        "colors": [
+          "blue"
+        ],
+        "categories": [
+          "casual"
+        ]
+      },
+      "matches": 3,
+      "search_time_ms": 4.312038421630859,
+      "top_results": [
+        {
+          "title": "Blue and Grey Casual Shirts Set",
+          "relevance": 1.0,
+          "properties": {
+            "style": "casual"
+          }
+        },
+        {
+          "title": "Blue Denim Jeans",
+          "relevance": 0.5,
+          "properties": {}
+        },
+        {
+          "title": "Blue Floral Summer Dress",
+          "relevance": 0.5,
+          "properties": {
+            "category": "dress",
+            "season": "summer"
+          }
+        }
+      ]
+    },
+    "Summer dresses": {
+      "query": "summer dress",
+      "filters": {
+        "categories": [
+          "dress",
+          "dresses"
+        ]
+      },
+      "matches": 4,
+      "search_time_ms": 3.403902053833008,
+      "top_results": [
+        {
+          "title": "White Summer Dress",
+          "relevance": 1.0,
+          "properties": {}
+        },
+        {
+          "title": "Blue Floral Summer Dress",
+          "relevance": 1.0,
+          "properties": {
+            "category": "dress",
+            "season": "summer"
+          }
+        },
+        {
+          "title": "Geometric Pattern A-Line Dress",
+          "relevance": 0.5,
+          "properties": {
+            "category": "dress"
+          }
+        }
+      ]
+    },
+    "Graphic t-shirts": {
+      "query": "graphic tshirt",
+      "filters": {
+        "categories": [
+          "shirt",
+          "top"
+        ]
+      },
+      "matches": 2,
+      "search_time_ms": 3.4990310668945312,
+      "top_results": [
+        {
+          "title": "Flat Mars Graphic Shirt",
+          "relevance": 0.5,
+          "properties": {
+            "category": "shoes"
+          }
+        },
+        {
+          "title": "QUEEN Eagle Graphic Tee",
+          "relevance": 0.5,
+          "properties": {
+            "category": "shirt"
+          }
+        }
+      ]
+    }
+  },
+  "performance_comparison": {
+    "legacy_search": {
+      "blue jeans": {
+        "results_count": 0,
+        "search_time_ms": 4.05573844909668
+      },
+      "summer dress": {
+        "results_count": 2,
+        "search_time_ms": 3.4270286560058594
+      },
+      "graphic tshirt": {
+        "results_count": 0,
+        "search_time_ms": 8.842945098876953
+      },
+      "casual wear": {
+        "results_count": 0,
+        "search_time_ms": 3.3829212188720703
+      }
+    },
+    "v2_search": {
+      "blue jeans": {
+        "results_count": 1,
+        "high_relevance_count": 1,
+        "search_time_ms": 4.216194152832031
+      },
+      "summer dress": {
+        "results_count": 4,
+        "high_relevance_count": 1,
+        "search_time_ms": 3.9229393005371094
+      },
+      "graphic tshirt": {
+        "results_count": 2,
+        "high_relevance_count": 1,
+        "search_time_ms": 3.5817623138427734
+      },
+      "casual wear": {
+        "results_count": 1,
+        "high_relevance_count": 1,
+        "search_time_ms": 3.4308433532714844
+      }
+    },
+    "performance_gain": {
+      "blue jeans": {
+        "speedup_factor": 0.9619429993214205,
+        "quality_improvement": 1
+      },
+      "summer dress": {
+        "speedup_factor": 0.8735869697338033,
+        "quality_improvement": -1
+      },
+      "graphic tshirt": {
+        "speedup_factor": 2.468881049058111,
+        "quality_improvement": 1
+      },
+      "casual wear": {
+        "speedup_factor": 0.9860319666435025,
+        "quality_improvement": 1
+      }
+    }
+  }
+}

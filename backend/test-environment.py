@@ -121,7 +121,8 @@ def main():
         if failed_services:
             print("\n❌ Failed Services:")
             for service in failed_services:
-                print(f"   • {service['description']}: {service.get('error', 'HTTP ' + str(service['status']))}")
+                error_msg = service.get('error', f"HTTP {service['status']}")
+                print(f"   • {service['description']}: {error_msg}")
 
     # Test observability features specifically
     print("\n🔬 Testing Observability Features...")
@@ -165,7 +166,7 @@ def test_observability_features():
                     print(f"✅ Found {trace_count} traces in Jaeger")
                 else:
                     print("⚠️  No traces found yet (may need more time)")
-            except:
+            except Exception:
                 print("✅ Jaeger API responded (trace data format not parsed)")
         else:
             print("❌ Could not retrieve traces from Jaeger")

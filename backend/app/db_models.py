@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -16,6 +17,15 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+try:
+    from pgvector.sqlalchemy import Vector
+    PGVECTOR_AVAILABLE = True
+except ImportError:
+    PGVECTOR_AVAILABLE = False
+    # Fallback type for when pgvector is not available
+    def Vector(dim: int) -> Any:
+        return JSON
 
 metadata_obj = MetaData()
 
@@ -33,9 +43,37 @@ class Garment(Base):
     price: Mapped[float | None] = mapped_column(Float)
     currency: Mapped[str | None] = mapped_column(String(8))
     image_path: Mapped[str | None] = mapped_column(String(512))
+
+    # Legacy JSON embeddings (for backward compatibility)
     image_embedding: Mapped[list[float] | None] = mapped_column(JSON)
-    description: Mapped[str | None] = mapped_column(String(2048))
     description_embedding: Mapped[list[float] | None] = mapped_column(JSON)
+
+    # New native vector embeddings (optimal performance)
+    image_embedding_vec: Mapped[Any] = mapped_column(Vector(512), nullable=True)
+    description_embedding_vec: Mapped[Any] = mapped_column(Vector(512), nullable=True)
+    openai_text_embedding_vec: Mapped[Any] = mapped_column(Vector(1536), nullable=True)
+
+    # Ontology-based properties for rich filtering and display
+    category: Mapped[str | None] = mapped_column(String(64), index=True)
+    subcategory: Mapped[str | None] = mapped_column(String(64), index=True)
+    primary_color: Mapped[str | None] = mapped_column(String(32), index=True)
+    secondary_color: Mapped[str | None] = mapped_column(String(32))
+    pattern: Mapped[str | None] = mapped_column(String(32))
+    material: Mapped[str | None] = mapped_column(String(64), index=True)
+    style: Mapped[str | None] = mapped_column(String(32))
+    fit: Mapped[str | None] = mapped_column(String(32))
+    season: Mapped[str | None] = mapped_column(String(32))
+    occasion: Mapped[str | None] = mapped_column(String(32))
+    era: Mapped[str | None] = mapped_column(String(32))
+    gender: Mapped[str | None] = mapped_column(String(16))
+    size: Mapped[str | None] = mapped_column(String(16))
+    condition: Mapped[str | None] = mapped_column(String(32))
+    designer_tier: Mapped[str | None] = mapped_column(String(32))
+    sustainability_score: Mapped[float | None] = mapped_column(Float)
+    ontology_confidence: Mapped[float | None] = mapped_column(Float)
+    properties_extracted_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    description: Mapped[str | None] = mapped_column(String(2048))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     attributes: Mapped[list[GarmentAttribute]] = relationship(
         back_populates="garment", cascade="all,delete-orphan"
@@ -54,6 +92,7 @@ class InventoryImage(Base):
     height: Mapped[int | None] = mapped_column(Integer)
     hash: Mapped[str | None] = mapped_column(String(64), index=True)
     processed: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    source: Mapped[str | None] = mapped_column(String(64), index=True)  # external provider/source tag
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
 
 
@@ -72,7 +111,14 @@ class InventoryItem(Base):
         Integer
     )  # sequential index if multiple garments detected
     description: Mapped[str | None] = mapped_column(String(2048))
+
+    # Legacy JSON embedding (for backward compatibility)
     description_embedding: Mapped[list[float] | None] = mapped_column(JSON)
+
+    # New native vector embedding (optimal performance)
+    description_embedding_vec: Mapped[Any] = mapped_column(Vector(512), nullable=True)
+    openai_text_embedding_vec: Mapped[Any] = mapped_column(Vector(1536), nullable=True)
+
     attributes_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
     color_stats: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))

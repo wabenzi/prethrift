@@ -4,12 +4,10 @@ import os
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from .. import openai_extractor
 from ..core import embed_text_cached, get_client
-from ..db_models import Base
 from ..describe_images import describe_image as _orig_describe_image
 from ..refresh_description import DescribeFn, refresh_description_core
 
@@ -56,8 +54,9 @@ class RefreshDescriptionRequest(BaseModel):
 
 @router.post("/garments/refresh-description")
 def refresh_description(req: RefreshDescriptionRequest) -> dict[str, object]:
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    from ..ingest import get_engine
+
+    engine = get_engine()
     with Session(engine) as session:
         # For tests we allow operation with or without a real OpenAI key: if missing, no client
         client = None

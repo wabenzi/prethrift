@@ -1,0 +1,38 @@
+{
+  "text_searches": [
+    "blue denim jeans with stars",
+    "geometric pattern dress bohemian",
+    "queen graphic tee cream colored",
+    "orange floral summer dress",
+    "mars space graphic shirt",
+    "blue flower spring dress"
+  ],
+  "filter_combinations": [
+    {
+      "category": "dresses",
+      "season": "summer"
+    },
+    {
+      "primary_color": "blue",
+      "style": "casual"
+    },
+    {
+      "category": "tops",
+      "style": "graphic"
+    },
+    {
+      "pattern": "floral",
+      "season": "spring"
+    },
+    {
+      "material": "denim",
+      "fit": "relaxed"
+    }
+  ],
+  "similarity_searches": [
+    "Find items similar to the blue pattern dress",
+    "Show me clothes like the QUEEN t-shirt",
+    "Similar to the wide-leg jeans",
+    "More dresses like the orange floral one"
+  ]
+}

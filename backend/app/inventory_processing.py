@@ -35,7 +35,10 @@ def persist_raw_image(filename: str, image_b64: str) -> str:
 
 def standardize_and_optimize(path: str) -> tuple[str, int, int, str]:
     """Resize & convert image to optimized JPEG; returns (path, w, h, fmt)."""
-    from PIL import Image
+    try:
+        from PIL import Image
+    except ImportError:
+        raise ImportError("PIL/Pillow is required for image processing")
 
     max_dim = int(os.getenv("INVENTORY_MAX_DIM", "1024"))
     p = Path(path)
@@ -68,7 +71,20 @@ def multi_garment_prompt(ontology_families_list: list[str] | None = None) -> str
 
 
 def describe_inventory_image_multi(client, path: str, model: str | None) -> list[dict[str, Any]]:
-    """Obtain structured multi-garment description from model; fallback to single description."""
+    """Obtain structured multi-garment description from model; supports OpenAI or local CV."""
+    # Check configuration for analysis method
+    use_local_cv = os.getenv("USE_LOCAL_CV", "false").lower() in ("true", "1", "yes")
+
+    if use_local_cv:
+        try:
+            from .local_cv import analyze_garments_local
+            return analyze_garments_local(path)
+        except ImportError:
+            print("Local CV requested but dependencies not available, falling back to OpenAI")
+        except Exception as e:
+            print(f"Local CV analysis failed: {e}, falling back to OpenAI")
+
+    # Original OpenAI path
     if not client or "OPENAI_API_KEY" not in os.environ:
         p = Path(path)
         return [

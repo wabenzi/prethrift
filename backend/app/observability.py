@@ -143,16 +143,25 @@ def configure_tracing():
     # Configure exporters
     if OTLP_ENDPOINT:
         # OTLP exporter (for services like Grafana, DataDog, etc.)
+        otlp_headers = None
+        if os.getenv('OTLP_API_KEY'):
+            otlp_headers = {"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"}
+        
         otlp_exporter = OTLPSpanExporter(
             endpoint=OTLP_ENDPOINT,
-            headers={"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"} if os.getenv('OTLP_API_KEY') else None
+            headers=otlp_headers
         )
         tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
 
     if JAEGER_ENDPOINT:
         # Jaeger thrift exporter (more compatible with protobuf constraints)
+        if '://' in JAEGER_ENDPOINT:
+            agent_host = JAEGER_ENDPOINT.split('://')[1].split(':')[0]
+        else:
+            agent_host = JAEGER_ENDPOINT.split(':')[0]
+            
         jaeger_exporter = JaegerExporter(
-            agent_host_name=JAEGER_ENDPOINT.split('://')[1].split(':')[0] if '://' in JAEGER_ENDPOINT else JAEGER_ENDPOINT.split(':')[0],
+            agent_host_name=agent_host,
             agent_port=14268,  # Default Jaeger thrift port
         )
         tracer_provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
@@ -163,10 +172,14 @@ def configure_metrics():
 
     if OTLP_ENDPOINT:
         # OTLP metrics exporter
+        metrics_headers = None
+        if os.getenv('OTLP_API_KEY'):
+            metrics_headers = {"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"}
+            
         metric_reader = PeriodicExportingMetricReader(
             OTLPMetricExporter(
                 endpoint=OTLP_ENDPOINT.replace('/v1/traces', '/v1/metrics'),
-                headers={"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"} if os.getenv('OTLP_API_KEY') else None
+                headers=metrics_headers
             ),
             export_interval_millis=10000  # Export every 10 seconds
         )
@@ -195,7 +208,7 @@ def configure_error_tracking():
                 FastApiIntegration(auto_enable=True),
                 SqlalchemyIntegration(),
             ],
-            before_send=lambda event, hint: event if ENVIRONMENT == "production" else None
+            before_send=lambda event, _: event if ENVIRONMENT == "production" else None
         )
 
 
@@ -315,7 +328,7 @@ def create_prometheus_metrics_endpoint():
     return metrics_endpoint
 
 
-def get_logger(name: str = None):
+def get_logger(name: str | None = None):
     """Get a structured logger instance."""
     return structlog.get_logger(name or __name__)
 

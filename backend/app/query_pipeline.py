@@ -6,15 +6,14 @@ Initial simple implementation; can evolve to ANN + feedback-aware reranking.
 from __future__ import annotations
 
 import math
-import os
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import openai_extractor, user_state
-from .db_models import Base, Garment
+from .db_models import Garment
 from .describe_images import embed_text
 
 
@@ -110,8 +109,9 @@ def _attribute_overlap_score(parsed: ParsedQuery, garment: Garment) -> tuple[flo
 def _load_user_preferences(user_id: str | None) -> dict[int, float]:
     if not user_id:
         return {}
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    from .ingest import get_engine
+
+    engine = get_engine()
     from sqlalchemy import select as _select
 
     from .db_models import UserPreference
@@ -134,8 +134,9 @@ def _load_user_positive_embedding(user_id: str | None) -> list[float] | None:
     cached = user_state.get_user_embedding(user_id)
     if cached is not None:
         return cached
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    from .ingest import get_engine
+
+    engine = get_engine()
 
     from sqlalchemy import select as _select
 
@@ -165,8 +166,9 @@ def _load_user_negative_embedding(user_id: str | None) -> list[float] | None:
     cached = user_state.get_user_embedding(user_id + "__neg")
     if cached is not None:
         return cached
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    from .ingest import get_engine
+
+    engine = get_engine()
     from sqlalchemy import select as _select
 
     from .db_models import InteractionEvent
@@ -191,8 +193,9 @@ def _load_user_negative_embedding(user_id: str | None) -> list[float] | None:
 def retrieve_and_rank(
     parsed: ParsedQuery, limit: int = 10, user_id: str | None = None
 ) -> tuple[list[RankedGarment], dict[int, list]]:
-    engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-    Base.metadata.create_all(engine)
+    from .ingest import get_engine
+
+    engine = get_engine()
     with Session(engine) as session:
         # Preload attribute relationships for scoring
         garments = session.scalars(select(Garment)).all()

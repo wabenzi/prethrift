@@ -174,13 +174,12 @@ def main() -> int:
     session = None
     if args.store_db:
         # runtime imports for optional DB persistence
-        from sqlalchemy import create_engine, select
+        from sqlalchemy import select
         from sqlalchemy.orm import Session
 
-        from .db_models import Base, Garment
-
-        engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./prethrift.db"), future=True)
-        Base.metadata.create_all(engine)
+        from .db_models import Garment
+        from .ingest import get_engine
+        engine = get_engine()
         session = Session(engine)
 
     count = 0
@@ -197,11 +196,14 @@ def main() -> int:
             if session:
                 from sqlalchemy import select
 
+                from .vector_utils import set_embeddings_dual_format
+
                 g = session.scalars(select(Garment).where(Garment.image_path == str(img))).first()
                 if g and (g.description is None or args.overwrite):
                     g.description = cache_entry.description
                     if cache_entry.embedding:
-                        g.description_embedding = cache_entry.embedding
+                        # Store embedding in both vector and JSON formats
+                        set_embeddings_dual_format(g, 'description_embedding', cache_entry.embedding)
                     session.commit()
             count += 1
             continue
@@ -225,13 +227,16 @@ def main() -> int:
                 )
                 if session:
                     # Upsert garment by image_path if exists
+                    from .vector_utils import set_embeddings_dual_format
+
                     g = session.scalars(
                         select(Garment).where(Garment.image_path == str(img))
                     ).first()
                     if g:
                         g.description = text
                         if embedding:
-                            g.description_embedding = embedding
+                            # Store embedding in both vector and JSON formats
+                            set_embeddings_dual_format(g, 'description_embedding', embedding)
                         session.commit()
             except Exception as e:  # noqa: BLE001
                 err_text = f"[ERROR] Failed to describe {img.name}: {e}"

@@ -1,0 +1,8 @@
+Alembic migrations for Prethrift backend.
+Generate new revision:
+
+alembic revision -m "describe change"
+
+Apply:
+
+alembic upgrade head
