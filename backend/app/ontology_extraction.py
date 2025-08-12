@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, Tuple
 
 try:
     from PIL import Image
+
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
@@ -23,6 +24,7 @@ from .local_cv import LocalGarmentAnalyzer
 from .ontology import attribute_confidences, classify_basic_cached
 
 logger = logging.getLogger(__name__)
+
 
 class OntologyExtractionService:
     """Service for extracting and populating ontology-based garment properties."""
@@ -39,8 +41,9 @@ class OntologyExtractionService:
         except Exception as e:
             logger.warning(f"CLIP analyzer not available: {e}")
 
-    def extract_properties(self, garment: Garment, session: Session,
-                          force_reextract: bool = False) -> bool:
+    def extract_properties(
+        self, garment: Garment, session: Session, force_reextract: bool = False
+    ) -> bool:
         """
         Extract and populate ontology properties for a garment.
 
@@ -98,46 +101,55 @@ class OntologyExtractionService:
                 return properties
 
             image = Image.open(garment.image_path)
-            if image.mode != 'RGB':
-                image = image.convert('RGB')
+            if image.mode != "RGB":
+                image = image.convert("RGB")
 
             # Use CLIP to analyze the image
             analysis = self.clip_analyzer.analyze_image(image)
 
             # Extract structured properties from CLIP analysis
-            if analysis.get('garments'):
-                primary_garment = analysis['garments'][0]  # Use the most confident detection
+            if analysis.get("garments"):
+                primary_garment = analysis["garments"][0]  # Use the most confident detection
 
                 # Map CLIP categories to our ontology
                 category_mapping = {
-                    't-shirt': 'tops', 'shirt': 'tops', 'blouse': 'tops',
-                    'dress': 'dresses', 'skirt': 'bottoms',
-                    'pants': 'bottoms', 'jeans': 'bottoms', 'shorts': 'bottoms',
-                    'jacket': 'outerwear', 'coat': 'outerwear', 'blazer': 'outerwear',
-                    'sneakers': 'shoes', 'boots': 'shoes', 'heels': 'shoes'
+                    "t-shirt": "tops",
+                    "shirt": "tops",
+                    "blouse": "tops",
+                    "dress": "dresses",
+                    "skirt": "bottoms",
+                    "pants": "bottoms",
+                    "jeans": "bottoms",
+                    "shorts": "bottoms",
+                    "jacket": "outerwear",
+                    "coat": "outerwear",
+                    "blazer": "outerwear",
+                    "sneakers": "shoes",
+                    "boots": "shoes",
+                    "heels": "shoes",
                 }
 
-                clip_category = primary_garment.get('category', '').lower()
+                clip_category = primary_garment.get("category", "").lower()
                 if clip_category in category_mapping:
-                    properties['category'] = category_mapping[clip_category]
-                    properties['subcategory'] = clip_category
+                    properties["category"] = category_mapping[clip_category]
+                    properties["subcategory"] = clip_category
 
             # Extract color information
-            if analysis.get('attributes', {}).get('colors'):
-                colors = analysis['attributes']['colors']
+            if analysis.get("attributes", {}).get("colors"):
+                colors = analysis["attributes"]["colors"]
                 if colors:
-                    properties['primary_color'] = colors[0].get('color', '').lower()
+                    properties["primary_color"] = colors[0].get("color", "").lower()
                     if len(colors) > 1:
-                        properties['secondary_color'] = colors[1].get('color', '').lower()
+                        properties["secondary_color"] = colors[1].get("color", "").lower()
 
             # Extract style and material hints
-            if analysis.get('attributes', {}).get('styles'):
-                styles = analysis['attributes']['styles']
+            if analysis.get("attributes", {}).get("styles"):
+                styles = analysis["attributes"]["styles"]
                 if styles:
-                    properties['style'] = styles[0].get('style', '').lower()
+                    properties["style"] = styles[0].get("style", "").lower()
 
             # Set confidence based on CLIP confidence
-            properties['ontology_confidence'] = analysis.get('confidence', 0.5)
+            properties["ontology_confidence"] = analysis.get("confidence", 0.5)
 
         except Exception as e:
             logger.warning(f"Image analysis failed for garment {garment.id}: {e}")
@@ -160,22 +172,22 @@ class OntologyExtractionService:
             ontology_result = {}
             for family, values in raw_attributes.items():
                 ontology_result[family] = [
-                    {'value': value, 'confidence': confidence_scores.get((family, value), 0.5)}
+                    {"value": value, "confidence": confidence_scores.get((family, value), 0.5)}
                     for value in values
                 ]
 
             # Map ontology results to database columns
             dimension_mapping = {
-                'category': 'category',
-                'color': 'primary_color',
-                'material': 'material',
-                'style': 'style',
-                'fit': 'fit',
-                'season': 'season',
-                'occasion': 'occasion',
-                'era': 'era',
-                'gender': 'gender',
-                'brand': 'brand'  # Can validate against existing brand
+                "category": "category",
+                "color": "primary_color",
+                "material": "material",
+                "style": "style",
+                "fit": "fit",
+                "season": "season",
+                "occasion": "occasion",
+                "era": "era",
+                "gender": "gender",
+                "brand": "brand",  # Can validate against existing brand
             }
 
             for dimension, db_column in dimension_mapping.items():
@@ -183,30 +195,31 @@ class OntologyExtractionService:
                     values = ontology_result[dimension]
                     if values:
                         # Take the highest confidence value
-                        best_value = max(values, key=lambda x: x['confidence'])
-                        properties[db_column] = best_value['value'].lower()
+                        best_value = max(values, key=lambda x: x["confidence"])
+                        properties[db_column] = best_value["value"].lower()
 
             # Extract subcategory if available
-            if 'subcategory' in ontology_result and ontology_result['subcategory']:
-                best_subcat = max(ontology_result['subcategory'], key=lambda x: x['confidence'])
-                properties['subcategory'] = best_subcat['value'].lower()
+            if "subcategory" in ontology_result and ontology_result["subcategory"]:
+                best_subcat = max(ontology_result["subcategory"], key=lambda x: x["confidence"])
+                properties["subcategory"] = best_subcat["value"].lower()
 
             # Calculate overall confidence
             all_confidences = []
             for values in ontology_result.values():
                 if isinstance(values, list):
-                    all_confidences.extend([v['confidence'] for v in values])
+                    all_confidences.extend([v["confidence"] for v in values])
 
             if all_confidences:
-                properties['ontology_confidence'] = sum(all_confidences) / len(all_confidences)
+                properties["ontology_confidence"] = sum(all_confidences) / len(all_confidences)
 
         except Exception as e:
             logger.warning(f"Text analysis failed for garment {garment.id}: {e}")
 
         return properties
 
-    def _merge_properties(self, image_props: Dict[str, Any],
-                         text_props: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_properties(
+        self, image_props: Dict[str, Any], text_props: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Merge properties from image and text analysis, resolving conflicts."""
         merged = {}
 
@@ -214,25 +227,35 @@ class OntologyExtractionService:
         merged.update(text_props)
 
         # Override with image properties where they're more reliable
-        image_priority_fields = ['primary_color', 'secondary_color', 'category']
+        image_priority_fields = ["primary_color", "secondary_color", "category"]
 
         for field in image_priority_fields:
             if field in image_props and image_props[field]:
                 merged[field] = image_props[field]
 
         # Take the higher confidence score
-        text_conf = text_props.get('ontology_confidence', 0)
-        image_conf = image_props.get('ontology_confidence', 0)
-        merged['ontology_confidence'] = max(text_conf, image_conf)
+        text_conf = text_props.get("ontology_confidence", 0)
+        image_conf = image_props.get("ontology_confidence", 0)
+        merged["ontology_confidence"] = max(text_conf, image_conf)
 
         return merged
 
     def _apply_properties(self, garment: Garment, properties: Dict[str, Any]):
         """Apply extracted properties to the garment instance."""
         property_fields = [
-            'category', 'subcategory', 'primary_color', 'secondary_color',
-            'pattern', 'material', 'style', 'fit', 'season', 'occasion',
-            'era', 'gender', 'ontology_confidence'
+            "category",
+            "subcategory",
+            "primary_color",
+            "secondary_color",
+            "pattern",
+            "material",
+            "style",
+            "fit",
+            "season",
+            "occasion",
+            "era",
+            "gender",
+            "ontology_confidence",
         ]
 
         for field in property_fields:
@@ -241,16 +264,16 @@ class OntologyExtractionService:
 
         # Set designer tier based on brand (simple heuristic)
         if garment.brand:
-            luxury_brands = {'gucci', 'prada', 'louis vuitton', 'chanel', 'dior'}
-            premium_brands = {'ralph lauren', 'tommy hilfiger', 'calvin klein', 'hugo boss'}
+            luxury_brands = {"gucci", "prada", "louis vuitton", "chanel", "dior"}
+            premium_brands = {"ralph lauren", "tommy hilfiger", "calvin klein", "hugo boss"}
 
             brand_lower = garment.brand.lower()
             if any(luxury in brand_lower for luxury in luxury_brands):
-                garment.designer_tier = 'luxury'
+                garment.designer_tier = "luxury"
             elif any(premium in brand_lower for premium in premium_brands):
-                garment.designer_tier = 'premium'
+                garment.designer_tier = "premium"
             else:
-                garment.designer_tier = 'mid-range'
+                garment.designer_tier = "mid-range"
 
     def _generate_openai_embeddings(self, garment: Garment):
         """Generate OpenAI embeddings for the garment description."""
@@ -259,8 +282,9 @@ class OntologyExtractionService:
         # being generated elsewhere in the system
         logger.info(f"OpenAI embeddings should be generated for garment {garment.id}")
 
-    def batch_extract(self, session: Session, limit: Optional[int] = None,
-                     force_reextract: bool = False) -> Tuple[int, int]:
+    def batch_extract(
+        self, session: Session, limit: Optional[int] = None, force_reextract: bool = False
+    ) -> Tuple[int, int]:
         """
         Extract properties for multiple garments in batch.
 

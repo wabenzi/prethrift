@@ -41,7 +41,7 @@ def verify_cognito_jwt(token: str) -> Dict[str, Any]:
     if not key_data:
         raise HTTPException(status_code=401, detail="Unknown kid")
     public_key = jwk.construct(key_data)
-    message, encoded_sig = token.rsplit('.', 1)
+    message, encoded_sig = token.rsplit(".", 1)
     decoded_sig = base64url_decode(encoded_sig.encode())
     if not public_key.verify(message.encode(), decoded_sig):
         raise HTTPException(status_code=401, detail="Signature verification failed")

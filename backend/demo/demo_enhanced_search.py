@@ -41,6 +41,7 @@ DESIGN_IMAGES_PATH = Path(__file__).parent / "design" / "images"
 DESIGN_TEXT_PATH = Path(__file__).parent / "design" / "text"
 DATABASE_URL = "postgresql://localhost/prethrift_dev"
 
+
 class SearchDemoRunner:
     """Demonstrates enhanced search capabilities with real examples."""
 
@@ -83,8 +84,8 @@ class SearchDemoRunner:
                     "style": "wide-leg",
                     "fit": "relaxed",
                     "season": "spring",
-                    "occasion": "casual"
-                }
+                    "occasion": "casual",
+                },
             },
             "pattern_dress": {
                 "title": "Geometric Pattern A-Line Dress",
@@ -98,8 +99,8 @@ class SearchDemoRunner:
                     "pattern": "geometric",
                     "style": "bohemian",
                     "season": "summer",
-                    "occasion": "casual"
-                }
+                    "occasion": "casual",
+                },
             },
             "queen_tshirt": {
                 "title": "QUEEN Eagle Graphic Tee",
@@ -112,8 +113,8 @@ class SearchDemoRunner:
                     "style": "graphic",
                     "fit": "relaxed",
                     "season": "summer",
-                    "occasion": "casual"
-                }
+                    "occasion": "casual",
+                },
             },
             "orange_dress": {
                 "title": "Orange Pattern Dress",
@@ -124,8 +125,8 @@ class SearchDemoRunner:
                     "primary_color": "orange",
                     "pattern": "floral",
                     "season": "summer",
-                    "occasion": "casual"
-                }
+                    "occasion": "casual",
+                },
             },
             "mars_shirt": {
                 "title": "Flat Mars Graphic Shirt",
@@ -135,9 +136,9 @@ class SearchDemoRunner:
                     "category": "tops",
                     "subcategory": "shirt",
                     "style": "graphic",
-                    "occasion": "casual"
-                }
-            }
+                    "occasion": "casual",
+                },
+            },
         }
 
         # Load descriptions
@@ -161,7 +162,7 @@ class SearchDemoRunner:
             "colorful geometric pattern dress",
             "cream graphic t-shirt with eagles",
             "orange summer dress",
-            "casual graphic shirt"
+            "casual graphic shirt",
         ]
 
         results = {}
@@ -174,7 +175,7 @@ class SearchDemoRunner:
             search_query = SearchQuery(
                 text_embedding=None,  # Would be generated from OpenAI in real implementation
                 similarity_threshold=0.6,
-                limit=10
+                limit=10,
             )
 
             with self.SessionLocal() as session:
@@ -187,7 +188,11 @@ class SearchDemoRunner:
                         # Simple keyword matching for demo
                         query_words = query.lower().split()
                         desc_words = garment.description.lower().split()
-                        matches = sum(1 for word in query_words if any(word in desc_word for desc_word in desc_words))
+                        matches = sum(
+                            1
+                            for word in query_words
+                            if any(word in desc_word for desc_word in desc_words)
+                        )
 
                         if matches > 0:
                             confidence = matches / len(query_words)
@@ -203,10 +208,10 @@ class SearchDemoRunner:
 
                 # Show top results
                 for i, (garment, confidence) in enumerate(matching_garments[:3]):
-                    print(f"  {i+1}. {garment.title or 'Unknown'} (confidence: {confidence:.2f})")
-                    if hasattr(garment, 'category') and garment.category:
+                    print(f"  {i + 1}. {garment.title or 'Unknown'} (confidence: {confidence:.2f})")
+                    if hasattr(garment, "category") and garment.category:
                         print(f"      Category: {garment.category}")
-                    if hasattr(garment, 'primary_color') and garment.primary_color:
+                    if hasattr(garment, "primary_color") and garment.primary_color:
                         print(f"      Color: {garment.primary_color}")
 
                 results[query] = {
@@ -216,11 +221,11 @@ class SearchDemoRunner:
                         {
                             "title": g.title,
                             "confidence": conf,
-                            "category": getattr(g, 'category', None),
-                            "color": getattr(g, 'primary_color', None)
+                            "category": getattr(g, "category", None),
+                            "color": getattr(g, "primary_color", None),
                         }
                         for g, conf in matching_garments[:3]
-                    ]
+                    ],
                 }
 
         return results
@@ -240,7 +245,7 @@ class SearchDemoRunner:
         test_pairs = [
             ("baggy_jeans", "pattern_dress", "Different categories"),
             ("pattern_dress", "orange_dress", "Same category (dresses)"),
-            ("queen_tshirt", "mars_shirt", "Same category (tops)")
+            ("queen_tshirt", "mars_shirt", "Same category (tops)"),
         ]
 
         with self.SessionLocal() as session:
@@ -261,7 +266,10 @@ class SearchDemoRunner:
                         if emb1 is not None and emb2 is not None:
                             # Calculate cosine similarity
                             import numpy as np
-                            similarity = np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+
+                            similarity = np.dot(emb1, emb2) / (
+                                np.linalg.norm(emb1) * np.linalg.norm(emb2)
+                            )
 
                             print(f"  📊 Visual similarity: {similarity:.3f}")
 
@@ -280,7 +288,7 @@ class SearchDemoRunner:
                             results[f"{item1_id}_vs_{item2_id}"] = {
                                 "similarity_score": float(similarity),
                                 "interpretation": interpretation,
-                                "comparison_type": comparison_type
+                                "comparison_type": comparison_type,
                             }
 
                 except Exception as e:
@@ -311,10 +319,7 @@ class SearchDemoRunner:
                 if values:
                     best_value = max(values, key=lambda v: confidence_scores.get((family, v), 0))
                     confidence = confidence_scores.get((family, best_value), 0)
-                    extracted_properties[family] = {
-                        "value": best_value,
-                        "confidence": confidence
-                    }
+                    extracted_properties[family] = {"value": best_value, "confidence": confidence}
 
             print(f"  📊 Extracted {len(extracted_properties)} properties:")
 
@@ -326,10 +331,14 @@ class SearchDemoRunner:
             for prop, expected_value in expected.items():
                 extracted = extracted_properties.get(prop)
                 if extracted and extracted["value"] == expected_value:
-                    print(f"    ✅ {prop}: {extracted['value']} (confidence: {extracted['confidence']:.2f})")
+                    print(
+                        f"    ✅ {prop}: {extracted['value']} (confidence: {extracted['confidence']:.2f})"
+                    )
                     matches += 1
                 elif extracted:
-                    print(f"    ⚠️  {prop}: got '{extracted['value']}', expected '{expected_value}' (confidence: {extracted['confidence']:.2f})")
+                    print(
+                        f"    ⚠️  {prop}: got '{extracted['value']}', expected '{expected_value}' (confidence: {extracted['confidence']:.2f})"
+                    )
                 else:
                     print(f"    ❌ {prop}: not detected (expected '{expected_value}')")
 
@@ -341,7 +350,7 @@ class SearchDemoRunner:
                 "expected_properties": expected,
                 "accuracy": accuracy,
                 "matches": matches,
-                "total_expected": total_expected
+                "total_expected": total_expected,
             }
 
         return results
@@ -358,28 +367,21 @@ class SearchDemoRunner:
             {
                 "name": "Find blue casual wear",
                 "text_query": "blue casual",
-                "filters": {
-                    "colors": ["blue"],
-                    "categories": ["casual"]
-                },
-                "description": "Searching for blue casual items"
+                "filters": {"colors": ["blue"], "categories": ["casual"]},
+                "description": "Searching for blue casual items",
             },
             {
                 "name": "Summer dresses",
                 "text_query": "summer dress",
-                "filters": {
-                    "categories": ["dress", "dresses"]
-                },
-                "description": "Looking for summer dresses"
+                "filters": {"categories": ["dress", "dresses"]},
+                "description": "Looking for summer dresses",
             },
             {
                 "name": "Graphic t-shirts",
                 "text_query": "graphic tshirt",
-                "filters": {
-                    "categories": ["shirt", "top"]
-                },
-                "description": "Looking for graphic t-shirts"
-            }
+                "filters": {"categories": ["shirt", "top"]},
+                "description": "Looking for graphic t-shirts",
+            },
         ]
 
         with self.SessionLocal() as session:
@@ -397,7 +399,7 @@ class SearchDemoRunner:
                     limit=20,
                     similarity_threshold=0.5,
                     use_vector_search=False,  # Using metadata for demo
-                    combine_scores=True
+                    combine_scores=True,
                 )
 
                 # Execute search using metadata filtering
@@ -435,10 +437,12 @@ class SearchDemoRunner:
 
                 # Show results
                 for i, (garment, relevance) in enumerate(matching_garments[:3]):
-                    print(f"     {i+1}. {garment.title or 'Unknown'} (relevance: {relevance:.2f})")
+                    print(
+                        f"     {i + 1}. {garment.title or 'Unknown'} (relevance: {relevance:.2f})"
+                    )
 
                     properties = []
-                    for prop in ['category', 'primary_color', 'style', 'season']:
+                    for prop in ["category", "primary_color", "style", "season"]:
                         value = getattr(garment, prop, None)
                         if value:
                             properties.append(f"{prop}: {value}")
@@ -457,12 +461,12 @@ class SearchDemoRunner:
                             "relevance": rel,
                             "properties": {
                                 prop: getattr(g, prop, None)
-                                for prop in ['category', 'primary_color', 'style', 'season']
+                                for prop in ["category", "primary_color", "style", "season"]
                                 if getattr(g, prop, None)
-                            }
+                            },
                         }
                         for g, rel in matching_garments[:3]
-                    ]
+                    ],
                 }
 
         return results
@@ -472,18 +476,9 @@ class SearchDemoRunner:
         print("\n⚡ DEMO: Performance Comparison")
         print("=" * 50)
 
-        results = {
-            "legacy_search": {},
-            "v2_search": {},
-            "performance_gain": {}
-        }
+        results = {"legacy_search": {}, "v2_search": {}, "performance_gain": {}}
 
-        test_queries = [
-            "blue jeans",
-            "summer dress",
-            "graphic tshirt",
-            "casual wear"
-        ]
+        test_queries = ["blue jeans", "summer dress", "graphic tshirt", "casual wear"]
 
         with self.SessionLocal() as session:
             for query in test_queries:
@@ -505,6 +500,7 @@ class SearchDemoRunner:
 
                 # Parse query with ontology
                 from app.ontology import classify_basic_cached
+
                 query_attributes = classify_basic_cached(query)
 
                 for garment in session.query(Garment).all():
@@ -521,7 +517,14 @@ class SearchDemoRunner:
                             relevance_score += 0.3
 
                     # Category inference
-                    if 'jeans' in query and getattr(garment, 'category', None) == 'bottoms' or 'dress' in query and getattr(garment, 'category', None) == 'dresses' or 'tshirt' in query and getattr(garment, 'category', None) == 'tops':
+                    if (
+                        "jeans" in query
+                        and getattr(garment, "category", None) == "bottoms"
+                        or "dress" in query
+                        and getattr(garment, "category", None) == "dresses"
+                        or "tshirt" in query
+                        and getattr(garment, "category", None) == "tops"
+                    ):
                         relevance_score += 0.2
 
                     if relevance_score > 0:
@@ -534,28 +537,32 @@ class SearchDemoRunner:
                 print(f"  🚀 V2.0: {len(v2_results)} results in {v2_time:.1f}ms")
 
                 if legacy_time > 0:
-                    speedup = legacy_time / v2_time if v2_time > 0 else float('inf')
-                    print(f"  ⚡ Performance: {speedup:.1f}x {'faster' if speedup > 1 else 'slower'}")
+                    speedup = legacy_time / v2_time if v2_time > 0 else float("inf")
+                    print(
+                        f"  ⚡ Performance: {speedup:.1f}x {'faster' if speedup > 1 else 'slower'}"
+                    )
 
                 precision_legacy = len(legacy_results)
                 precision_v2 = len([r for r in v2_results if r[1] > 0.5])
 
-                print(f"  🎯 Quality: Legacy={precision_legacy}, V2.0={precision_v2} high-relevance results")
+                print(
+                    f"  🎯 Quality: Legacy={precision_legacy}, V2.0={precision_v2} high-relevance results"
+                )
 
                 results["legacy_search"][query] = {
                     "results_count": len(legacy_results),
-                    "search_time_ms": legacy_time
+                    "search_time_ms": legacy_time,
                 }
 
                 results["v2_search"][query] = {
                     "results_count": len(v2_results),
                     "high_relevance_count": precision_v2,
-                    "search_time_ms": v2_time
+                    "search_time_ms": v2_time,
                 }
 
                 results["performance_gain"][query] = {
                     "speedup_factor": speedup if legacy_time > 0 else 0,
-                    "quality_improvement": precision_v2 - precision_legacy
+                    "quality_improvement": precision_v2 - precision_legacy,
                 }
 
         return results
@@ -572,13 +579,13 @@ class SearchDemoRunner:
             "demo_metadata": {
                 "timestamp": datetime.now(UTC).isoformat(),
                 "demo_garments_count": len(self.demo_garments),
-                "database_url": DATABASE_URL
+                "database_url": DATABASE_URL,
             },
             "text_search": await self.demo_text_search(),
             "visual_similarity": await self.demo_visual_similarity(),
             "ontology_extraction": await self.demo_ontology_extraction(),
             "hybrid_search": await self.demo_hybrid_search(),
-            "performance_comparison": await self.demo_performance_comparison()
+            "performance_comparison": await self.demo_performance_comparison(),
         }
 
         # Summary
@@ -587,12 +594,16 @@ class SearchDemoRunner:
 
         ontology_results = full_results["ontology_extraction"]
         if ontology_results:
-            avg_accuracy = sum(r["accuracy"] for r in ontology_results.values()) / len(ontology_results)
+            avg_accuracy = sum(r["accuracy"] for r in ontology_results.values()) / len(
+                ontology_results
+            )
             print(f"🏷️  Ontology Extraction Accuracy: {avg_accuracy:.1%}")
 
         performance_results = full_results["performance_comparison"]
         if performance_results.get("performance_gain"):
-            avg_speedup = sum(r["speedup_factor"] for r in performance_results["performance_gain"].values()) / len(performance_results["performance_gain"])
+            avg_speedup = sum(
+                r["speedup_factor"] for r in performance_results["performance_gain"].values()
+            ) / len(performance_results["performance_gain"])
             print(f"⚡ Average Performance Gain: {avg_speedup:.1f}x")
 
         visual_results = full_results["visual_similarity"]
@@ -601,7 +612,7 @@ class SearchDemoRunner:
 
         if export_results:
             output_file = f"demo_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(full_results, f, indent=2, default=str)
             print(f"💾 Results exported to: {output_file}")
 
@@ -612,8 +623,12 @@ class SearchDemoRunner:
 async def main():
     """Main demo execution function."""
     parser = argparse.ArgumentParser(description="Prethrift v2.0 Search Demonstration")
-    parser.add_argument("--test-case", choices=["text", "visual", "ontology", "hybrid", "performance", "all"],
-                       default="all", help="Specific test case to run")
+    parser.add_argument(
+        "--test-case",
+        choices=["text", "visual", "ontology", "hybrid", "performance", "all"],
+        default="all",
+        help="Specific test case to run",
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("--export-results", action="store_true", help="Export results to JSON file")
     parser.add_argument("--database-url", default=DATABASE_URL, help="Database URL")
@@ -643,6 +658,7 @@ async def main():
         print(f"❌ Demo failed: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -651,5 +667,6 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     exit_code = asyncio.run(main())
     exit(exit_code)

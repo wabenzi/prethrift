@@ -40,68 +40,68 @@ def create_test_garments(session, analyzer):
 
     test_garments = [
         {
-            'title': 'Red Cotton T-Shirt',
-            'brand': 'Example Brand',
-            'price': 25.99,
-            'description': 'Comfortable red cotton t-shirt with classic fit',
-            'color': (255, 100, 100)  # Red
+            "title": "Red Cotton T-Shirt",
+            "brand": "Example Brand",
+            "price": 25.99,
+            "description": "Comfortable red cotton t-shirt with classic fit",
+            "color": (255, 100, 100),  # Red
         },
         {
-            'title': 'Blue Denim Jeans',
-            'brand': 'Denim Co',
-            'price': 89.99,
-            'description': 'Classic blue denim jeans with straight leg cut',
-            'color': (100, 100, 255)  # Blue
+            "title": "Blue Denim Jeans",
+            "brand": "Denim Co",
+            "price": 89.99,
+            "description": "Classic blue denim jeans with straight leg cut",
+            "color": (100, 100, 255),  # Blue
         },
         {
-            'title': 'Black Leather Jacket',
-            'brand': 'Leather Works',
-            'price': 199.99,
-            'description': 'Premium black leather jacket with silver hardware',
-            'color': (50, 50, 50)  # Dark gray/black
+            "title": "Black Leather Jacket",
+            "brand": "Leather Works",
+            "price": 199.99,
+            "description": "Premium black leather jacket with silver hardware",
+            "color": (50, 50, 50),  # Dark gray/black
         },
         {
-            'title': 'White Summer Dress',
-            'brand': 'Summer Style',
-            'price': 59.99,
-            'description': 'Flowing white summer dress perfect for warm weather',
-            'color': (255, 255, 255)  # White
-        }
+            "title": "White Summer Dress",
+            "brand": "Summer Style",
+            "price": 59.99,
+            "description": "Flowing white summer dress perfect for warm weather",
+            "color": (255, 255, 255),  # White
+        },
     ]
 
     created_garments = []
 
     for i, garment_data in enumerate(test_garments):
         # Create a colored test image
-        image = Image.new('RGB', (224, 224), color=garment_data['color'])
+        image = Image.new("RGB", (224, 224), color=garment_data["color"])
 
         # Save to temporary file
-        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
-            image.save(tmp.name, 'JPEG')
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            image.save(tmp.name, "JPEG")
             image_path = tmp.name
 
         try:
             # Generate CLIP embeddings
             image_embedding = analyzer.get_image_embedding(image)
-            text_embedding = analyzer.get_text_embedding(garment_data['description'])
+            text_embedding = analyzer.get_text_embedding(garment_data["description"])
 
             # Create garment record
             garment = Garment(
-                external_id=f'demo_{i}',
-                title=garment_data['title'],
-                brand=garment_data['brand'],
-                price=garment_data['price'],
-                currency='USD',
+                external_id=f"demo_{i}",
+                title=garment_data["title"],
+                brand=garment_data["brand"],
+                price=garment_data["price"],
+                currency="USD",
                 image_path=image_path,
-                description=garment_data['description'],
-                created_at=datetime.now(UTC)
+                description=garment_data["description"],
+                created_at=datetime.now(UTC),
             )
 
             # Store embeddings in both formats for optimal compatibility
             if image_embedding:
-                set_embeddings_dual_format(garment, 'image_embedding', image_embedding)
+                set_embeddings_dual_format(garment, "image_embedding", image_embedding)
             if text_embedding:
-                set_embeddings_dual_format(garment, 'description_embedding', text_embedding)
+                set_embeddings_dual_format(garment, "description_embedding", text_embedding)
 
             session.add(garment)
             created_garments.append(garment)
@@ -114,6 +114,7 @@ def create_test_garments(session, analyzer):
     session.commit()
     print(f"\\n✅ Created {len(created_garments)} garments with CLIP embeddings")
     return created_garments
+
 
 def demonstrate_vector_search(session, garments):
     """Demonstrate vector similarity search capabilities."""
@@ -152,33 +153,40 @@ def demonstrate_vector_search(session, garments):
     for result in results:
         print(f"    → {result.garment.title}: ${result.garment.price}")
 
+
 def analyze_performance(session):
     """Analyze database performance with vector indexes."""
     print("\\n📊 Performance Analysis...")
 
     try:
         # Check index usage
-        result = session.execute(text('''
+        result = session.execute(
+            text("""
             SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read
             FROM pg_stat_user_indexes
             WHERE tablename = 'garment' AND indexname LIKE '%hnsw%'
-        ''')).fetchall()
+        """)
+        ).fetchall()
 
         if result:
             print("  Vector index statistics:")
             for row in result:
-                print(f"    → {row.indexname}: {row.idx_scan} scans, {row.idx_tup_read} tuples read")
+                print(
+                    f"    → {row.indexname}: {row.idx_scan} scans, {row.idx_tup_read} tuples read"
+                )
         else:
             print("  ⚠ No HNSW index usage statistics yet")
 
         # Check vector column usage
-        result = session.execute(text('''
+        result = session.execute(
+            text("""
             SELECT
                 COUNT(*) as total_garments,
                 COUNT(image_embedding_vec) as with_image_vectors,
                 COUNT(description_embedding_vec) as with_text_vectors
             FROM garment
-        ''')).fetchone()
+        """)
+        ).fetchone()
 
         if result:
             print("\\n  Database statistics:")
@@ -192,6 +200,7 @@ def analyze_performance(session):
 
     except Exception as e:
         print(f"  ⚠ Performance analysis failed: {e}")
+
 
 def main():
     """Run the complete migration path demonstration."""
@@ -216,7 +225,7 @@ def main():
         print("  ✓ CLIP analyzer initialized")
 
         # Test CLIP functionality
-        test_image = Image.new('RGB', (224, 224), color='red')
+        test_image = Image.new("RGB", (224, 224), color="red")
         embedding = analyzer.get_image_embedding(test_image)
         print(f"  ✓ CLIP generating {len(embedding)}-dimensional embeddings")
 
@@ -237,10 +246,12 @@ def main():
     except Exception as e:
         print(f"\\n❌ Demo failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:
         session.close()
+
 
 if __name__ == "__main__":
     main()

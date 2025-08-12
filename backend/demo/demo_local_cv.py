@@ -8,7 +8,7 @@ import sys
 from PIL import Image
 
 # Set up the path
-sys.path.insert(0, '/Users/leonhardt/dev/prethrift/backend')
+sys.path.insert(0, "/Users/leonhardt/dev/prethrift/backend")
 
 from app.local_cv import LocalGarmentAnalyzer
 
@@ -28,14 +28,16 @@ def demonstrate_local_cv():
 
     print("✅ Local CV system initialized successfully!")
     print(f"Model: {analyzer.model.__class__.__name__ if analyzer.model else 'Unknown'}")
-    print(f"Processor: {analyzer.processor.__class__.__name__ if analyzer.processor else 'Unknown'}")
+    print(
+        f"Processor: {analyzer.processor.__class__.__name__ if analyzer.processor else 'Unknown'}"
+    )
 
     # Test with different colored squares to simulate clothing items
     test_cases = [
-        ("Red Garment", Image.new('RGB', (224, 224), color='red')),
-        ("Blue Garment", Image.new('RGB', (224, 224), color='blue')),
-        ("Green Garment", Image.new('RGB', (224, 224), color='green')),
-        ("Black Garment", Image.new('RGB', (224, 224), color='black')),
+        ("Red Garment", Image.new("RGB", (224, 224), color="red")),
+        ("Blue Garment", Image.new("RGB", (224, 224), color="blue")),
+        ("Green Garment", Image.new("RGB", (224, 224), color="green")),
+        ("Black Garment", Image.new("RGB", (224, 224), color="black")),
     ]
 
     print(f"\n🧥 ANALYZING {len(test_cases)} TEST IMAGES")
@@ -46,28 +48,30 @@ def demonstrate_local_cv():
         result = analyzer.analyze_image(image)
 
         # Show garments detected
-        garments = result.get('garments', [])
+        garments = result.get("garments", [])
         print(f"   Garments detected: {len(garments)}")
 
         if garments:
             top_garment = garments[0]
-            print(f"   Top prediction: {top_garment['name']} (confidence: {top_garment['confidence']:.3f})")
+            print(
+                f"   Top prediction: {top_garment['name']} (confidence: {top_garment['confidence']:.3f})"
+            )
 
             # Show attributes
-            attrs = result.get('attributes', {}).get(top_garment['name'], {})
+            attrs = result.get("attributes", {}).get(top_garment["name"], {})
 
-            colors = attrs.get('colors', [])
+            colors = attrs.get("colors", [])
             if colors:
-                color_str = ', '.join([f"{c['name']} ({c['confidence']:.3f})" for c in colors[:2]])
+                color_str = ", ".join([f"{c['name']} ({c['confidence']:.3f})" for c in colors[:2]])
                 print(f"   Colors: {color_str}")
 
-            styles = attrs.get('styles', [])
+            styles = attrs.get("styles", [])
             if styles:
-                style_str = ', '.join([f"{s['name']} ({s['confidence']:.3f})" for s in styles[:1]])
+                style_str = ", ".join([f"{s['name']} ({s['confidence']:.3f})" for s in styles[:1]])
                 print(f"   Style: {style_str}")
 
         # Show description
-        description = result.get('description', 'No description')
+        description = result.get("description", "No description")
         print(f"   Description: {description}")
 
         print(f"   Overall confidence: {result.get('confidence', 0):.3f}")

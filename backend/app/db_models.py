@@ -20,12 +20,15 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 try:
     from pgvector.sqlalchemy import Vector
+
     PGVECTOR_AVAILABLE = True
 except ImportError:
     PGVECTOR_AVAILABLE = False
+
     # Fallback type for when pgvector is not available
     def Vector(dim: int) -> Any:
         return JSON
+
 
 metadata_obj = MetaData()
 
@@ -92,7 +95,9 @@ class InventoryImage(Base):
     height: Mapped[int | None] = mapped_column(Integer)
     hash: Mapped[str | None] = mapped_column(String(64), index=True)
     processed: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    source: Mapped[str | None] = mapped_column(String(64), index=True)  # external provider/source tag
+    source: Mapped[str | None] = mapped_column(
+        String(64), index=True
+    )  # external provider/source tag
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
 
 

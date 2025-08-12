@@ -4,6 +4,7 @@ This Lambda is triggered when a new image is uploaded to the IMAGES_BUCKET.
 It standardizes, classifies, and inserts records similar to the synchronous
 /process API but in an asynchronous batch fashion.
 """
+
 from __future__ import annotations
 
 import json
@@ -49,9 +50,13 @@ def handler(event, context):  # noqa: D401
                 s3.download_file(bucket, key, tmp.name)
                 optimized_path, w, h, fmt = standardize_and_optimize(tmp.name)
                 with Session(engine) as session:
-                    img = _upsert_inventory_image(session, optimized_path, w, h, fmt, overwrite=False)
+                    img = _upsert_inventory_image(
+                        session, optimized_path, w, h, fmt, overwrite=False
+                    )
                     # classification pipeline
-                    garment_entries = describe_inventory_image_multi(client_local, img.file_path, None)
+                    garment_entries = describe_inventory_image_multi(
+                        client_local, img.file_path, None
+                    )
                     for entry in garment_entries:
                         idx = entry["index"]
                         desc = entry["description"]
@@ -66,7 +71,9 @@ def handler(event, context):  # noqa: D401
                         except Exception:
                             img_feature = []
                         external_id = f"inv-{img.id}-{idx}"
-                        g_existing = session.query(Garment).filter_by(external_id=external_id).first()
+                        g_existing = (
+                            session.query(Garment).filter_by(external_id=external_id).first()
+                        )
                         if not g_existing:
                             g_existing = Garment(
                                 external_id=external_id,
@@ -77,7 +84,11 @@ def handler(event, context):  # noqa: D401
                             )
                             session.add(g_existing)
                             session.flush()
-                        inv_item = session.query(InventoryItem).filter_by(image_id=img.id, slot_index=idx).first()
+                        inv_item = (
+                            session.query(InventoryItem)
+                            .filter_by(image_id=img.id, slot_index=idx)
+                            .first()
+                        )
                         if not inv_item:
                             inv_item = InventoryItem(
                                 image_id=img.id,
@@ -93,17 +104,29 @@ def handler(event, context):  # noqa: D401
                         inferred = classify_basic_cached(desc)
                         conf_map = attribute_confidences(desc, inferred) if inferred else {}
                         if inferred and g_existing:
-                            existing_pairs = {(ga.attribute.family, ga.attribute.value) for ga in g_existing.attributes or []}
+                            existing_pairs = {
+                                (ga.attribute.family, ga.attribute.value)
+                                for ga in g_existing.attributes or []
+                            }
                             for fam, vals in inferred.items():
                                 for v in vals:
                                     if (fam, v) in existing_pairs:
                                         continue
-                                    av = session.query(AttributeValue).filter_by(family=fam, value=v).first()
+                                    av = (
+                                        session.query(AttributeValue)
+                                        .filter_by(family=fam, value=v)
+                                        .first()
+                                    )
                                     if not av:
                                         av = AttributeValue(family=fam, value=v)
                                         session.add(av)
                                         session.flush()
-                                    safe_add_garment_attribute(session, garment_id=g_existing.id, av_id=av.id, confidence=conf_map.get((fam, v), 0.5))
+                                    safe_add_garment_attribute(
+                                        session,
+                                        garment_id=g_existing.id,
+                                        av_id=av.id,
+                                        confidence=conf_map.get((fam, v), 0.5),
+                                    )
                                     existing_pairs.add((fam, v))
                             inv_item.attributes_extracted = True
                         inv_item.color_stats = color_stats(img.file_path)

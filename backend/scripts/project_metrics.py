@@ -14,6 +14,7 @@ Usage:
 
 Limitations: heuristic comment detection, ignores vendored/minified assets.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -35,8 +36,6 @@ COMMENT_PATTERNS = {
 }
 
 SOURCE_EXTS = {".py", ".ts", ".tsx", ".js", ".swift", ".html", ".css"}
-EXCLUDE_DIRS = {"node_modules", ".venv", "venv", "dist", "build", "__pycache__",
-                ".pytest_cache", ".ruff_cache", ".mypy_cache"}
 EXCLUDE_DIRS = {
     "node_modules",
     ".venv",
@@ -48,6 +47,18 @@ EXCLUDE_DIRS = {
     ".ruff_cache",
     ".mypy_cache",
 }
+EXCLUDE_DIRS = {
+    "node_modules",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".mypy_cache",
+}
+
 
 @dataclass
 class FileMetrics:
@@ -88,7 +99,7 @@ def walk(root: Path) -> list[FileMetrics]:
     metrics: list[FileMetrics] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # prune
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS and not d.startswith('.')]
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS and not d.startswith(".")]
         for filename in filenames:
             p = Path(dirpath) / filename
             fm = collect_file_metrics(p)
@@ -99,9 +110,12 @@ def walk(root: Path) -> list[FileMetrics]:
 
 def run_ruff_count(root: Path) -> int | None:
     try:
-        proc = subprocess.run([
-            "ruff", "check", str(root), "--quiet", "--output-format", "json"
-        ], capture_output=True, text=True, check=False)
+        proc = subprocess.run(
+            ["ruff", "check", str(root), "--quiet", "--output-format", "json"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         if proc.returncode not in (0, 1):  # 0 = clean, 1 = lint issues
             return None
         if not proc.stdout.strip():
@@ -202,6 +216,7 @@ def main() -> None:
         print("Top files:")
         for tf in result.get("top_files_by_sloc", []):
             print(f"  {tf['sloc']:5d}  {tf['path']}")
+
 
 if __name__ == "__main__":
     main()

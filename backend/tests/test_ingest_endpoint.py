@@ -29,7 +29,7 @@ def test_ingest_requires_image():
 
 def test_ingest_success(monkeypatch, tmp_path):
     # isolate DB per test
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path/'db.sqlite'}")
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'db.sqlite'}")
     client = TestClient(app)
 
     # Provide lightweight fake image_to_feature to bypass heavy torch import

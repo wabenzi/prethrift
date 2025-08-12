@@ -29,7 +29,7 @@ def _solid_color_png(rgb):
 
 
 def test_dominant_color_attribute_added(tmp_path, monkeypatch):
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path/'db.sqlite'}")
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'db.sqlite'}")
     monkeypatch.setenv("INVENTORY_IMAGE_DIR", str(tmp_path / "imgs"))
     # Red-ish
     img_b64 = base64.b64encode(_solid_color_png((200, 40, 40))).decode()

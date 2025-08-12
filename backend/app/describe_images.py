@@ -179,6 +179,7 @@ def main() -> int:
 
         from .db_models import Garment
         from .ingest import get_engine
+
         engine = get_engine()
         session = Session(engine)
 
@@ -203,7 +204,9 @@ def main() -> int:
                     g.description = cache_entry.description
                     if cache_entry.embedding:
                         # Store embedding in both vector and JSON formats
-                        set_embeddings_dual_format(g, 'description_embedding', cache_entry.embedding)
+                        set_embeddings_dual_format(
+                            g, "description_embedding", cache_entry.embedding
+                        )
                     session.commit()
             count += 1
             continue
@@ -236,7 +239,7 @@ def main() -> int:
                         g.description = text
                         if embedding:
                             # Store embedding in both vector and JSON formats
-                            set_embeddings_dual_format(g, 'description_embedding', embedding)
+                            set_embeddings_dual_format(g, "description_embedding", embedding)
                         session.commit()
             except Exception as e:  # noqa: BLE001
                 err_text = f"[ERROR] Failed to describe {img.name}: {e}"

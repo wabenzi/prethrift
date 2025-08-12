@@ -119,6 +119,7 @@ def get_settings() -> Settings:
 # Environment-specific configurations
 class DevelopmentSettings(Settings):
     """Development-specific settings."""
+
     debug: bool = True
     log_level: str = "DEBUG"
     trace_sample_rate: float = 1.0
@@ -127,6 +128,7 @@ class DevelopmentSettings(Settings):
 
 class ProductionSettings(Settings):
     """Production-specific settings."""
+
     debug: bool = False
     log_level: str = "INFO"
     trace_sample_rate: float = 0.1
@@ -135,6 +137,7 @@ class ProductionSettings(Settings):
 
 class TestSettings(Settings):
     """Settings for testing environment."""
+
     environment: str = "test"
     debug: bool = True
     database_url: str = "postgresql://prethrift:prethrift_dev@localhost:5433/prethrift_test"
@@ -165,5 +168,5 @@ __all__ = [
     "get_environment_settings",
     "DevelopmentSettings",
     "ProductionSettings",
-    "TestSettings"
+    "TestSettings",
 ]

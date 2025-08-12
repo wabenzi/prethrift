@@ -319,6 +319,7 @@ def search(
             "top_components": [k for k, _ in top_components],
             "final_score": expl.get("final_score"),
         }
+
     parsed = parse_query(text, model=model)
     ranked, garment_attr_map = retrieve_and_rank(parsed, limit=limit, user_id=user_id)
     return {

@@ -17,6 +17,7 @@ def _create_test_image():
         import io
 
         from PIL import Image  # type: ignore
+
         # Create a simple colored rectangle that might look like clothing
         im = Image.new("RGB", (224, 224), (70, 130, 180))  # Steel blue
         # Add some texture/pattern
@@ -66,6 +67,7 @@ def test_local_cv_analyzer(tmp_path, monkeypatch):
         print("Local CV module not available (expected if CLIP not installed)")
         # Test that inventory processing handles this gracefully
         from app.inventory_processing import describe_inventory_image_multi
+
         results = describe_inventory_image_multi(None, str(img_path), None)
         assert len(results) == 1
         assert "Placeholder description" in results[0]["description"]
@@ -101,13 +103,14 @@ if __name__ == "__main__":
     # Quick manual test
     import tempfile
 
-
     class MockMonkeypatch:
         def __init__(self):
             self._env = {}
+
         def setenv(self, key, value):
             self._env[key] = value
             os.environ[key] = value
+
         def delenv(self, key, raising=True):
             if key in os.environ:
                 del os.environ[key]

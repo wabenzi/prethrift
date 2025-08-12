@@ -52,7 +52,9 @@ try:
         try:
             # Test basic health check
             health_check = await check_basic_health()
-            print(f"✅ Basic health check: {health_check.status.value} ({health_check.duration_ms}ms)")
+            print(
+                f"✅ Basic health check: {health_check.status.value} ({health_check.duration_ms}ms)"
+            )
 
         except Exception as e:
             print(f"❌ Health check error: {e}")
@@ -85,5 +87,6 @@ except ImportError as e:
 except Exception as e:
     print(f"❌ Unexpected error: {e}")
     import traceback
+
     traceback.print_exc()
     sys.exit(1)

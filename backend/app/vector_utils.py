@@ -6,6 +6,7 @@ from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
+
 def migrate_json_to_vector(json_embedding: Optional[List[float]]) -> Optional[Any]:
     """
     Convert JSON-stored embedding to native vector format.
@@ -28,6 +29,7 @@ def migrate_json_to_vector(json_embedding: Optional[List[float]]) -> Optional[An
 
     # pgvector expects the raw list for SQLAlchemy operations
     return json_embedding
+
 
 def vector_to_json_fallback(vector_embedding: Any) -> Optional[List[float]]:
     """
@@ -61,6 +63,7 @@ def vector_to_json_fallback(vector_embedding: Any) -> Optional[List[float]]:
         logger.warning(f"Could not convert vector to list: {type(vector_embedding)}")
         return None
 
+
 def get_embedding_for_search(obj, field_name: str) -> Optional[List[float]]:
     """
     Get embedding for similarity search, preferring vector column over JSON.
@@ -86,6 +89,7 @@ def get_embedding_for_search(obj, field_name: str) -> Optional[List[float]]:
             return json_value
 
     return None
+
 
 def set_embeddings_dual_format(obj, field_name: str, embedding: List[float]) -> None:
     """

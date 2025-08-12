@@ -24,8 +24,10 @@ from app.ingest import _resolve_database_url  # type: ignore  # noqa: E402
 
 target_metadata = Base.metadata
 
+
 def get_url():
     return os.getenv("DATABASE_URL") or _resolve_database_url()
+
 
 def run_migrations_offline():
     url = get_url()
@@ -37,6 +39,7 @@ def run_migrations_offline():
     )
     with context.begin_transaction():
         context.run_migrations()
+
 
 def run_migrations_online():
     configuration = config.get_section(config.config_ini_section) or {}
@@ -50,6 +53,7 @@ def run_migrations_online():
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

@@ -18,16 +18,17 @@ PROMETHEUS_URL = "http://localhost:9090"
 GRAFANA_URL = "http://localhost:3000"
 LOCALSTACK_URL = "http://localhost:4567"  # Updated to mapped port
 
+
 def test_endpoint(url: str, description: str) -> Dict[str, Any]:
     """Test a single endpoint and return results"""
     try:
         start_time = time.time()
         req = urllib.request.Request(url)
-        req.add_header('User-Agent', 'PreThrift-Test-Suite/1.0')
+        req.add_header("User-Agent", "PreThrift-Test-Suite/1.0")
 
         with urllib.request.urlopen(req, timeout=10) as response:
             duration = time.time() - start_time
-            content = response.read().decode('utf-8')
+            content = response.read().decode("utf-8")
 
             return {
                 "url": url,
@@ -36,7 +37,7 @@ def test_endpoint(url: str, description: str) -> Dict[str, Any]:
                 "duration": f"{duration:.3f}s",
                 "success": response.status == 200,
                 "content_length": len(content),
-                "content_preview": content[:200] + "..." if len(content) > 200 else content
+                "content_preview": content[:200] + "..." if len(content) > 200 else content,
             }
     except urllib.error.HTTPError as e:
         return {
@@ -45,7 +46,7 @@ def test_endpoint(url: str, description: str) -> Dict[str, Any]:
             "status": e.code,
             "duration": "N/A",
             "success": False,
-            "error": f"HTTP {e.code}: {e.reason}"
+            "error": f"HTTP {e.code}: {e.reason}",
         }
     except Exception as e:
         return {
@@ -54,8 +55,9 @@ def test_endpoint(url: str, description: str) -> Dict[str, Any]:
             "status": "ERROR",
             "duration": "N/A",
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
+
 
 def main():
     """Main test function"""
@@ -121,7 +123,7 @@ def main():
         if failed_services:
             print("\n❌ Failed Services:")
             for service in failed_services:
-                error_msg = service.get('error', f"HTTP {service['status']}")
+                error_msg = service.get("error", f"HTTP {service['status']}")
                 print(f"   • {service['description']}: {error_msg}")
 
     # Test observability features specifically
@@ -129,6 +131,7 @@ def main():
     test_observability_features()
 
     return successful == total
+
 
 def test_observability_features():
     """Test specific observability features"""
@@ -154,8 +157,7 @@ def test_observability_features():
     # Check if traces are available in Jaeger
     try:
         jaeger_result = test_endpoint(
-            f"{JAEGER_URL}/api/traces?service=prethrift-api&limit=10",
-            "Jaeger Traces"
+            f"{JAEGER_URL}/api/traces?service=prethrift-api&limit=10", "Jaeger Traces"
         )
 
         if jaeger_result["success"]:
@@ -176,8 +178,7 @@ def test_observability_features():
     # Check Prometheus metrics
     try:
         metrics_result = test_endpoint(
-            f"{PROMETHEUS_URL}/api/v1/query?query=http_requests_total",
-            "Prometheus HTTP Metrics"
+            f"{PROMETHEUS_URL}/api/v1/query?query=http_requests_total", "Prometheus HTTP Metrics"
         )
 
         if metrics_result["success"]:
@@ -186,6 +187,7 @@ def test_observability_features():
             print("⚠️  Prometheus metrics not yet available")
     except Exception as e:
         print(f"❌ Error checking Prometheus metrics: {e}")
+
 
 if __name__ == "__main__":
     try:

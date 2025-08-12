@@ -74,6 +74,7 @@ app.include_router(ingest_router)
 # Add metrics endpoint
 app.get("/metrics")(create_prometheus_metrics_endpoint())
 
+
 @app.on_event("startup")
 async def startup_event():
     """Application startup event."""
@@ -81,7 +82,7 @@ async def startup_event():
         "Starting Prethrift API",
         version=app.version,
         environment=settings.environment,
-        python_version=sys.version
+        python_version=sys.version,
     )
 
 
@@ -99,7 +100,7 @@ def root() -> dict[str, str]:
         "status": "ok",
         "message": "Prethrift API",
         "version": app.version,
-        "environment": settings.environment
+        "environment": settings.environment,
     }
 
 
@@ -117,8 +118,19 @@ class PresignRequest(BaseModel):
     cache_control: str | None = None
 
 
-def _build_post_policy(bucket: str, key: str, content_type: str | None, max_bytes: int, acl: str | None, cache_control: str | None, region: str, access_key: str) -> dict[str, str]:
-    expiration = (_dt.datetime.utcnow() + _dt.timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+def _build_post_policy(
+    bucket: str,
+    key: str,
+    content_type: str | None,
+    max_bytes: int,
+    acl: str | None,
+    cache_control: str | None,
+    region: str,
+    access_key: str,
+) -> dict[str, str]:
+    expiration = (_dt.datetime.utcnow() + _dt.timedelta(minutes=5)).strftime(
+        "%Y-%m-%dT%H:%M:%S.000Z"
+    )
     date_stamp = _dt.datetime.utcnow().strftime("%Y%m%d")
     amz_date = _dt.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
     credential = f"{access_key}/{date_stamp}/{region}/s3/aws4_request"
@@ -147,7 +159,11 @@ def require_api_key(x_api_key: str | None = Header(default=None)):
 
 
 @app.post("/upload/presign")
-def create_presigned_upload(req: PresignRequest, _: None = Depends(require_api_key), claims: Dict[str, Any] = Depends(cognito_dependency)) -> Dict[str, Any]:
+def create_presigned_upload(
+    req: PresignRequest,
+    _: None = Depends(require_api_key),
+    claims: Dict[str, Any] = Depends(cognito_dependency),
+) -> Dict[str, Any]:
     """Return pre-signed upload parameters for external clients.
 
     Supports:
@@ -183,7 +199,16 @@ def create_presigned_upload(req: PresignRequest, _: None = Depends(require_api_k
         return {"type": "put", "url": url, "key": object_key, "method": "PUT"}
 
     # POST policy route (SigV4). We compute signature manually.
-    policy_parts = _build_post_policy(bucket, object_key, req.content_type, max_bytes, req.acl, req.cache_control, region, frozen.access_key)
+    policy_parts = _build_post_policy(
+        bucket,
+        object_key,
+        req.content_type,
+        max_bytes,
+        req.acl,
+        req.cache_control,
+        region,
+        frozen.access_key,
+    )
     policy_b64 = policy_parts["policy"]
     amz_date = policy_parts["x_amz_date"]
     credential = policy_parts["x_amz_credential"]
@@ -191,6 +216,7 @@ def create_presigned_upload(req: PresignRequest, _: None = Depends(require_api_k
     def _sign(key: bytes, msg: str) -> bytes:
         import hashlib
         import hmac
+
         return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
 
     date_stamp = amz_date[:8]
@@ -200,10 +226,11 @@ def create_presigned_upload(req: PresignRequest, _: None = Depends(require_api_k
     k_signing = _sign(k_service, "aws4_request")
     import hashlib
     import hmac
+
     signature = hmac.new(k_signing, policy_b64.encode(), hashlib.sha256).hexdigest()
 
     form_fields: dict[str, str] = {
-    "key": object_key,
+        "key": object_key,
         "policy": policy_b64,
         "x-amz-algorithm": "AWS4-HMAC-SHA256",
         "x-amz-credential": credential,
@@ -219,11 +246,17 @@ def create_presigned_upload(req: PresignRequest, _: None = Depends(require_api_k
     if req.cache_control:
         form_fields["Cache-Control"] = req.cache_control
 
-    return {"type": "post", "url": f"https://{bucket}.s3.{region}.amazonaws.com", "fields": form_fields, "key": object_key}
+    return {
+        "type": "post",
+        "url": f"https://{bucket}.s3.{region}.amazonaws.com",
+        "fields": form_fields,
+        "key": object_key,
+    }
 
 
 try:
     from mangum import Mangum  # type: ignore
+
     handler = Mangum(app)
 except Exception:  # pragma: no cover
     handler = None

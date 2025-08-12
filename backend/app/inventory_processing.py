@@ -78,6 +78,7 @@ def describe_inventory_image_multi(client, path: str, model: str | None) -> list
     if use_local_cv:
         try:
             from .local_cv import analyze_garments_local
+
             return analyze_garments_local(path)
         except ImportError:
             print("Local CV requested but dependencies not available, falling back to OpenAI")

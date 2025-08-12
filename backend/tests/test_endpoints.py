@@ -10,13 +10,7 @@ def test_endpoints():
     """Test the observability endpoints."""
     base_url = "http://localhost:8001"
 
-    endpoints = [
-        "/",
-        "/health",
-        "/health/ready",
-        "/health/live",
-        "/metrics"
-    ]
+    endpoints = ["/", "/health", "/health/ready", "/health/live", "/metrics"]
 
     print("🔍 Testing Prethrift Backend Observability Endpoints\n")
 
@@ -29,7 +23,7 @@ def test_endpoints():
 
             print(f"✅ Status: {response.status_code}")
 
-            if response.headers.get('content-type', '').startswith('application/json'):
+            if response.headers.get("content-type", "").startswith("application/json"):
                 data = response.json()
                 print(f"✅ Response: {json.dumps(data, indent=2)}")
             else:

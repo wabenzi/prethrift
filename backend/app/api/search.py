@@ -61,31 +61,64 @@ def _clarify_query(original: str, model: str | None) -> str:
         "improve the results?"
     )
 
+
 # --- Off-topic detection additions ---
+
 
 def _build_fashion_vocab() -> set[str]:  # pragma: no cover
     try:
         from ..ontology import ONTOLOGY  # type: ignore
+
         vocab: set[str] = set()
         for fam, vals in ONTOLOGY.items():  # noqa: F402
             vocab.add(fam)
             vocab.update(vals)
-        vocab.update({
-            "vintage", "retro", "denim", "suede", "leather", "silk", "cotton", "linen", "wool",
-            "outfit", "garment", "clothing"
-        })
+        vocab.update(
+            {
+                "vintage",
+                "retro",
+                "denim",
+                "suede",
+                "leather",
+                "silk",
+                "cotton",
+                "linen",
+                "wool",
+                "outfit",
+                "garment",
+                "clothing",
+            }
+        )
         return vocab
     except Exception:  # pragma: no cover
         return {"shirt", "pants", "dress", "skirt", "jacket", "jeans", "vintage", "denim"}
 
+
 _FASHION_VOCAB = _build_fashion_vocab()
 _OFF_TOPIC_MARKERS = {
-    "bitcoin", "ethereum", "docker", "kubernetes", "recipe", "weather", "forecast", "football",
-    "soccer", "stocks", "price", "currency", "python", "javascript", "movie", "music", "lyrics"
+    "bitcoin",
+    "ethereum",
+    "docker",
+    "kubernetes",
+    "recipe",
+    "weather",
+    "forecast",
+    "football",
+    "soccer",
+    "stocks",
+    "price",
+    "currency",
+    "python",
+    "javascript",
+    "movie",
+    "music",
+    "lyrics",
 }
+
 
 def _is_off_topic(q: str) -> tuple[bool, str]:
     import re as _re
+
     norm = q.lower().strip()
     if not norm:
         return True, "empty query"
@@ -103,6 +136,7 @@ def _is_off_topic(q: str) -> tuple[bool, str]:
     if len(tokens) >= 3:
         return True, "no fashion tokens in multi-word query"
     return False, "short generic allowed"
+
 
 router = APIRouter(prefix="", tags=["search"])
 

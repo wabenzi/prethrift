@@ -26,7 +26,7 @@ def configure_structured_logging():
             structlog.stdlib.add_log_level,
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
-            structlog.processors.JSONRenderer()
+            structlog.processors.JSONRenderer(),
         ]
     else:
         # Console formatting for development
@@ -37,7 +37,7 @@ def configure_structured_logging():
             structlog.stdlib.add_log_level,
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
-            structlog.dev.ConsoleRenderer(colors=True)
+            structlog.dev.ConsoleRenderer(colors=True),
         ]
 
     structlog.configure(
@@ -62,7 +62,7 @@ async def logging_middleware(request: Request, call_next):
         method=request.method,
         url=str(request.url),
         user_agent=request.headers.get("user-agent"),
-        ip_address=request.client.host if request.client else None
+        ip_address=request.client.host if request.client else None,
     )
 
     # Start timing
@@ -76,7 +76,7 @@ async def logging_middleware(request: Request, call_next):
         "Request started",
         method=request.method,
         path=request.url.path,
-        query_params=dict(request.query_params)
+        query_params=dict(request.query_params),
     )
 
     try:
@@ -90,7 +90,7 @@ async def logging_middleware(request: Request, call_next):
         logger.info(
             "Request completed",
             status_code=response.status_code,
-            duration_ms=round(duration * 1000, 2)
+            duration_ms=round(duration * 1000, 2),
         )
 
         # Add request ID to response headers
@@ -108,7 +108,7 @@ async def logging_middleware(request: Request, call_next):
             error=str(exc),
             error_type=type(exc).__name__,
             duration_ms=round(duration * 1000, 2),
-            exc_info=True
+            exc_info=True,
         )
 
         # Re-raise exception to be handled by FastAPI
@@ -137,7 +137,7 @@ async def track_search_operation(search_type: str, logger=None):
         logger.info(
             "Search operation completed",
             search_type=search_type,
-            duration_ms=round(duration * 1000, 2)
+            duration_ms=round(duration * 1000, 2),
         )
 
     except Exception as exc:
@@ -148,7 +148,7 @@ async def track_search_operation(search_type: str, logger=None):
             error=str(exc),
             error_type=type(exc).__name__,
             duration_ms=round(duration * 1000, 2),
-            exc_info=True
+            exc_info=True,
         )
         raise
 
@@ -169,7 +169,7 @@ async def track_embedding_operation(operation_type: str, logger=None):
         logger.info(
             "Embedding operation completed",
             operation_type=operation_type,
-            duration_ms=round(duration * 1000, 2)
+            duration_ms=round(duration * 1000, 2),
         )
 
     except Exception as exc:
@@ -180,7 +180,7 @@ async def track_embedding_operation(operation_type: str, logger=None):
             error=str(exc),
             error_type=type(exc).__name__,
             duration_ms=round(duration * 1000, 2),
-            exc_info=True
+            exc_info=True,
         )
         raise
 

@@ -26,6 +26,7 @@ from PIL import Image
 # Try to import CLIP functionality
 try:
     from .local_cv import LocalGarmentAnalyzer
+
     CLIP_AVAILABLE = True
 except ImportError:
     CLIP_AVAILABLE = False
@@ -104,8 +105,8 @@ def _compute(path: Path) -> np.ndarray:
         try:
             # Load and process image
             image = Image.open(path)
-            if image.mode != 'RGB':
-                image = image.convert('RGB')
+            if image.mode != "RGB":
+                image = image.convert("RGB")
 
             # Get CLIP visual embedding
             embedding = analyzer.get_image_embedding(image)

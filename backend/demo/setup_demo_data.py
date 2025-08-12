@@ -39,6 +39,7 @@ DESIGN_IMAGES_PATH = Path(__file__).parent.parent / "design" / "images"
 DESIGN_TEXT_PATH = Path(__file__).parent.parent / "design" / "text"
 DATABASE_URL = "postgresql://localhost/prethrift_dev"
 
+
 class DemoDataSetup:
     """Sets up comprehensive demo data for v2.0 search demonstrations."""
 
@@ -75,8 +76,8 @@ class DemoDataSetup:
                     "seller": "VintageCollector",
                     "location": "San Francisco, CA",
                     "views": 127,
-                    "likes": 23
-                }
+                    "likes": 23,
+                },
             },
             "blue_black_pattern_dress": {
                 "title": "Geometric Pattern A-Line Dress",
@@ -91,8 +92,8 @@ class DemoDataSetup:
                     "seller": "BohemianStyle",
                     "location": "Austin, TX",
                     "views": 89,
-                    "likes": 15
-                }
+                    "likes": 15,
+                },
             },
             "blue_flower_dress": {
                 "title": "Blue Floral Summer Dress",
@@ -107,8 +108,8 @@ class DemoDataSetup:
                     "seller": "SpringWardrobe",
                     "location": "Portland, OR",
                     "views": 156,
-                    "likes": 31
-                }
+                    "likes": 31,
+                },
             },
             "flat_mars_shirt": {
                 "title": "Flat Mars Graphic Shirt",
@@ -123,8 +124,8 @@ class DemoDataSetup:
                     "seller": "SciFiTees",
                     "location": "Seattle, WA",
                     "views": 67,
-                    "likes": 12
-                }
+                    "likes": 12,
+                },
             },
             "orange_pattern_dress": {
                 "title": "Orange Floral Pattern Dress",
@@ -139,8 +140,8 @@ class DemoDataSetup:
                     "seller": "SummerVibes",
                     "location": "Miami, FL",
                     "views": 198,
-                    "likes": 42
-                }
+                    "likes": 42,
+                },
             },
             "queen_tshirt": {
                 "title": "QUEEN Eagle Graphic Tee",
@@ -155,8 +156,8 @@ class DemoDataSetup:
                     "seller": "ClassicRock",
                     "location": "Nashville, TN",
                     "views": 245,
-                    "likes": 67
-                }
+                    "likes": 67,
+                },
             },
             "test_blue_grey_shirts": {
                 "title": "Blue and Grey Casual Shirts Set",
@@ -172,9 +173,9 @@ class DemoDataSetup:
                     "seller": "CasualCloset",
                     "location": "Denver, CO",
                     "views": 78,
-                    "likes": 9
-                }
-            }
+                    "likes": 9,
+                },
+            },
         }
 
     async def reset_database(self):
@@ -202,7 +203,7 @@ class DemoDataSetup:
             if description_file:
                 description_path = DESIGN_TEXT_PATH / description_file
                 try:
-                    with open(description_path, encoding='utf-8') as f:
+                    with open(description_path, encoding="utf-8") as f:
                         descriptions[garment_id] = f.read().strip()
                     print(f"  ✅ Loaded description: {description_file}")
                 except FileNotFoundError:
@@ -210,7 +211,9 @@ class DemoDataSetup:
                     descriptions[garment_id] = f"Demo {garment_data['title']}"
             else:
                 # Use override description if provided
-                descriptions[garment_id] = garment_data.get("description_override", f"Demo {garment_data['title']}")
+                descriptions[garment_id] = garment_data.get(
+                    "description_override", f"Demo {garment_data['title']}"
+                )
                 print(f"  ✅ Using override description for: {garment_id}")
 
         return descriptions
@@ -266,7 +269,9 @@ class DemoDataSetup:
                     with Image.open(image_path) as img:
                         embedding = self.clip_analyzer.get_image_embedding(img)
                     embeddings[garment_id] = embedding
-                    print(f"    ✅ Generated embedding (length: {len(embedding) if embedding is not None else 'None'})")
+                    print(
+                        f"    ✅ Generated embedding (length: {len(embedding) if embedding is not None else 'None'})"
+                    )
                 except Exception as e:
                     print(f"    ❌ Error generating embedding: {e}")
                     embeddings[garment_id] = None
@@ -276,9 +281,12 @@ class DemoDataSetup:
 
         return embeddings
 
-    async def create_garment_records(self, descriptions: Dict[str, str],
-                                   ontology_data: Dict[str, Dict],
-                                   embeddings: Dict[str, Optional[np.ndarray]]) -> List[Garment]:
+    async def create_garment_records(
+        self,
+        descriptions: Dict[str, str],
+        ontology_data: Dict[str, Dict],
+        embeddings: Dict[str, Optional[np.ndarray]],
+    ) -> List[Garment]:
         """Create Garment database records."""
         print("\n💾 Creating garment records...")
 
@@ -290,7 +298,9 @@ class DemoDataSetup:
 
                 # Check if garment already exists
                 external_id = f"demo_{garment_id}"
-                existing_garment = session.query(Garment).filter(Garment.external_id == external_id).first()
+                existing_garment = (
+                    session.query(Garment).filter(Garment.external_id == external_id).first()
+                )
 
                 if existing_garment:
                     print(f"    ⚠️  Garment already exists, skipping: {external_id}")
@@ -309,7 +319,6 @@ class DemoDataSetup:
                     price=garment_data.get("price"),
                     size=garment_data.get("size"),
                     condition=garment_data.get("condition"),
-
                     # Extracted ontology properties
                     category=properties.get("category"),
                     subcategory=properties.get("subcategory"),
@@ -323,19 +332,17 @@ class DemoDataSetup:
                     season=properties.get("season"),
                     gender=properties.get("gender"),
                     era=properties.get("era"),
-
                     # Image info
                     image_path=f"/images/{garment_data['image_filename']}",
-
                     # Metadata
-                    created_at=datetime.fromisoformat(garment_data["metadata"]["upload_date"])
+                    created_at=datetime.fromisoformat(garment_data["metadata"]["upload_date"]),
                 )
 
                 # Add CLIP embedding if available
                 embedding = embeddings.get(garment_id)
                 if embedding is not None:
                     # Convert numpy array to list if needed
-                    if hasattr(embedding, 'tolist'):
+                    if hasattr(embedding, "tolist"):
                         embedding_list = embedding.tolist()
                     else:
                         embedding_list = list(embedding)
@@ -364,17 +371,33 @@ class DemoDataSetup:
             print(f"  📊 Total garments in database: {total_garments}")
 
             # Check for ontology properties
-            garments_with_category = session.query(Garment).filter(Garment.category.isnot(None)).count()
-            garments_with_color = session.query(Garment).filter(Garment.primary_color.isnot(None)).count()
-            garments_with_embeddings = session.query(Garment).filter(Garment.image_embedding.isnot(None)).count()
+            garments_with_category = (
+                session.query(Garment).filter(Garment.category.isnot(None)).count()
+            )
+            garments_with_color = (
+                session.query(Garment).filter(Garment.primary_color.isnot(None)).count()
+            )
+            garments_with_embeddings = (
+                session.query(Garment).filter(Garment.image_embedding.isnot(None)).count()
+            )
 
             print(f"  🏷️  Garments with category: {garments_with_category}")
             print(f"  🎨 Garments with color: {garments_with_color}")
             print(f"  🧠 Garments with embeddings: {garments_with_embeddings}")
 
             # Sample property distribution
-            categories = session.query(Garment.category).filter(Garment.category.isnot(None)).distinct().all()
-            colors = session.query(Garment.primary_color).filter(Garment.primary_color.isnot(None)).distinct().all()
+            categories = (
+                session.query(Garment.category)
+                .filter(Garment.category.isnot(None))
+                .distinct()
+                .all()
+            )
+            colors = (
+                session.query(Garment.primary_color)
+                .filter(Garment.primary_color.isnot(None))
+                .distinct()
+                .all()
+            )
 
             print(f"  📈 Categories found: {[c[0] for c in categories]}")
             print(f"  🌈 Colors found: {[c[0] for c in colors]}")
@@ -397,26 +420,26 @@ class DemoDataSetup:
                 "queen graphic tee cream colored",
                 "orange floral summer dress",
                 "mars space graphic shirt",
-                "blue flower spring dress"
+                "blue flower spring dress",
             ],
             "filter_combinations": [
                 {"category": "dresses", "season": "summer"},
                 {"primary_color": "blue", "style": "casual"},
                 {"category": "tops", "style": "graphic"},
                 {"pattern": "floral", "season": "spring"},
-                {"material": "denim", "fit": "relaxed"}
+                {"material": "denim", "fit": "relaxed"},
             ],
             "similarity_searches": [
                 "Find items similar to the blue pattern dress",
                 "Show me clothes like the QUEEN t-shirt",
                 "Similar to the wide-leg jeans",
-                "More dresses like the orange floral one"
-            ]
+                "More dresses like the orange floral one",
+            ],
         }
 
         # Save examples to file
         examples_file = Path(__file__).parent / "demo_search_examples.json"
-        with open(examples_file, 'w') as f:
+        with open(examples_file, "w") as f:
             json.dump(examples, f, indent=2)
 
         print(f"  💾 Saved search examples to: {examples_file}")
@@ -458,7 +481,9 @@ class DemoDataSetup:
         print("\n📊 SETUP SUMMARY")
         print("=" * 40)
         print(f"✅ Demo garments created: {len(garments)}")
-        print(f"🏷️  Ontology properties extracted: {sum(len(props) for props in ontology_data.values())}")
+        print(
+            f"🏷️  Ontology properties extracted: {sum(len(props) for props in ontology_data.values())}"
+        )
         if include_embeddings:
             embeddings_count = sum(1 for emb in embeddings.values() if emb is not None)
             print(f"🧠 CLIP embeddings generated: {embeddings_count}/{len(embeddings)}")
@@ -475,7 +500,7 @@ class DemoDataSetup:
             "garments_created": len(garments),
             "ontology_properties": ontology_data,
             "embeddings_generated": len([e for e in embeddings.values() if e is not None]),
-            "search_examples": search_examples
+            "search_examples": search_examples,
         }
 
 
@@ -483,7 +508,9 @@ async def main():
     """Main setup function."""
     parser = argparse.ArgumentParser(description="Setup Prethrift v2.0 Demo Data")
     parser.add_argument("--reset-db", action="store_true", help="Reset database before setup")
-    parser.add_argument("--no-embeddings", action="store_true", help="Skip CLIP embedding generation")
+    parser.add_argument(
+        "--no-embeddings", action="store_true", help="Skip CLIP embedding generation"
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("--database-url", default=DATABASE_URL, help="Database URL")
 
@@ -493,8 +520,7 @@ async def main():
         setup = DemoDataSetup(args.database_url)
 
         result = await setup.setup_full_demo_data(
-            reset_db=args.reset_db,
-            include_embeddings=not args.no_embeddings
+            reset_db=args.reset_db, include_embeddings=not args.no_embeddings
         )
 
         if args.verbose:
@@ -506,6 +532,7 @@ async def main():
         print(f"❌ Setup failed: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 

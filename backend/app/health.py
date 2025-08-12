@@ -21,6 +21,7 @@ logger = get_logger(__name__)
 
 class HealthStatus(str, Enum):
     """Health status enumeration."""
+
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     DEGRADED = "degraded"
@@ -29,6 +30,7 @@ class HealthStatus(str, Enum):
 @dataclass
 class HealthCheck:
     """Individual health check result."""
+
     name: str
     status: HealthStatus
     duration_ms: float
@@ -38,6 +40,7 @@ class HealthCheck:
 
 class HealthResponse(BaseModel):
     """Health check response model."""
+
     status: HealthStatus
     timestamp: datetime
     version: str
@@ -46,21 +49,18 @@ class HealthResponse(BaseModel):
     checks: List[Dict[str, Any]]
 
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        json_encoders = {datetime: lambda v: v.isoformat()}
 
 
 class ReadinessResponse(BaseModel):
     """Readiness check response model."""
+
     ready: bool
     timestamp: datetime
     critical_checks: List[Dict[str, Any]]
 
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        json_encoders = {datetime: lambda v: v.isoformat()}
 
 
 # Track startup time for uptime calculation
@@ -84,7 +84,7 @@ async def check_database() -> HealthCheck:
                 name="database",
                 status=HealthStatus.HEALTHY,
                 duration_ms=round(duration_ms, 2),
-                message="Database connection successful"
+                message="Database connection successful",
             )
         else:
             duration_ms = (time.time() - start_time) * 1000
@@ -92,7 +92,7 @@ async def check_database() -> HealthCheck:
                 name="database",
                 status=HealthStatus.UNHEALTHY,
                 duration_ms=round(duration_ms, 2),
-                message="Database query returned unexpected result"
+                message="Database query returned unexpected result",
             )
 
     except SQLAlchemyError as e:
@@ -102,16 +102,18 @@ async def check_database() -> HealthCheck:
             name="database",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Database error: {str(e)}"
+            message=f"Database error: {str(e)}",
         )
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
-        logger.error("Database health check failed with unexpected error", error=str(e), exc_info=True)
+        logger.error(
+            "Database health check failed with unexpected error", error=str(e), exc_info=True
+        )
         return HealthCheck(
             name="database",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Unexpected error: {str(e)}"
+            message=f"Unexpected error: {str(e)}",
         )
 
 
@@ -123,22 +125,26 @@ async def check_pgvector() -> HealthCheck:
         db = next(get_client())
 
         # Check if pgvector extension is available
-        result = db.execute(sa.text("""
+        result = db.execute(
+            sa.text("""
             SELECT EXISTS(
                 SELECT 1 FROM pg_extension WHERE extname = 'vector'
             ) as has_vector
-        """)).fetchone()
+        """)
+        ).fetchone()
 
         if result and result.has_vector:
             # Test vector operations
-            db.execute(sa.text("SELECT '[1,2,3]'::vector <-> '[1,2,4]'::vector as distance")).fetchone()
+            db.execute(
+                sa.text("SELECT '[1,2,3]'::vector <-> '[1,2,4]'::vector as distance")
+            ).fetchone()
 
             duration_ms = (time.time() - start_time) * 1000
             return HealthCheck(
                 name="pgvector",
                 status=HealthStatus.HEALTHY,
                 duration_ms=round(duration_ms, 2),
-                message="pgvector extension is available and functional"
+                message="pgvector extension is available and functional",
             )
         else:
             duration_ms = (time.time() - start_time) * 1000
@@ -146,7 +152,7 @@ async def check_pgvector() -> HealthCheck:
                 name="pgvector",
                 status=HealthStatus.UNHEALTHY,
                 duration_ms=round(duration_ms, 2),
-                message="pgvector extension not installed"
+                message="pgvector extension not installed",
             )
 
     except Exception as e:
@@ -156,7 +162,7 @@ async def check_pgvector() -> HealthCheck:
             name="pgvector",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"pgvector check failed: {str(e)}"
+            message=f"pgvector check failed: {str(e)}",
         )
 
 
@@ -178,7 +184,7 @@ async def check_embedding_model() -> HealthCheck:
                 status=HealthStatus.HEALTHY,
                 duration_ms=round(duration_ms, 2),
                 message=f"Embedding model functional, vector size: {len(test_embedding)}",
-                details={"embedding_dimension": len(test_embedding)}
+                details={"embedding_dimension": len(test_embedding)},
             )
         else:
             duration_ms = (time.time() - start_time) * 1000
@@ -186,7 +192,7 @@ async def check_embedding_model() -> HealthCheck:
                 name="embedding_model",
                 status=HealthStatus.UNHEALTHY,
                 duration_ms=round(duration_ms, 2),
-                message="Embedding model returned empty result"
+                message="Embedding model returned empty result",
             )
 
     except ImportError as e:
@@ -195,7 +201,7 @@ async def check_embedding_model() -> HealthCheck:
             name="embedding_model",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Embedding model import failed: {str(e)}"
+            message=f"Embedding model import failed: {str(e)}",
         )
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -204,7 +210,7 @@ async def check_embedding_model() -> HealthCheck:
             name="embedding_model",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Embedding model error: {str(e)}"
+            message=f"Embedding model error: {str(e)}",
         )
 
 
@@ -223,11 +229,11 @@ async def check_aws_s3() -> HealthCheck:
                 name="aws_s3",
                 status=HealthStatus.DEGRADED,
                 duration_ms=round(duration_ms, 2),
-                message="S3 bucket not configured (IMAGES_BUCKET not set)"
+                message="S3 bucket not configured (IMAGES_BUCKET not set)",
             )
 
         # Test S3 connection
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client("s3")
         s3_client.head_bucket(Bucket=bucket_name)
 
         duration_ms = (time.time() - start_time) * 1000
@@ -236,7 +242,7 @@ async def check_aws_s3() -> HealthCheck:
             status=HealthStatus.HEALTHY,
             duration_ms=round(duration_ms, 2),
             message=f"S3 bucket '{bucket_name}' is accessible",
-            details={"bucket_name": bucket_name}
+            details={"bucket_name": bucket_name},
         )
 
     except (BotoCoreError, ClientError) as e:
@@ -246,7 +252,7 @@ async def check_aws_s3() -> HealthCheck:
             name="aws_s3",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"S3 error: {str(e)}"
+            message=f"S3 error: {str(e)}",
         )
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -255,7 +261,7 @@ async def check_aws_s3() -> HealthCheck:
             name="aws_s3",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Unexpected S3 error: {str(e)}"
+            message=f"Unexpected S3 error: {str(e)}",
         )
 
 
@@ -290,8 +296,8 @@ async def check_memory_usage() -> HealthCheck:
             details={
                 "usage_percent": round(memory_usage_percent, 1),
                 "available_gb": round(memory_available_gb, 2),
-                "total_gb": round(memory.total / (1024**3), 2)
-            }
+                "total_gb": round(memory.total / (1024**3), 2),
+            },
         )
 
     except ImportError:
@@ -300,7 +306,7 @@ async def check_memory_usage() -> HealthCheck:
             name="memory",
             status=HealthStatus.DEGRADED,
             duration_ms=round(duration_ms, 2),
-            message="psutil not available for memory monitoring"
+            message="psutil not available for memory monitoring",
         )
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -309,7 +315,7 @@ async def check_memory_usage() -> HealthCheck:
             name="memory",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Memory check error: {str(e)}"
+            message=f"Memory check error: {str(e)}",
         )
 
 
@@ -322,27 +328,31 @@ async def run_all_health_checks() -> List[HealthCheck]:
         check_pgvector(),
         check_embedding_model(),
         check_aws_s3(),
-        check_memory_usage()
+        check_memory_usage(),
     ]
 
     # Run checks concurrently with timeout
     try:
         results = await asyncio.wait_for(
             asyncio.gather(*health_checks, return_exceptions=True),
-            timeout=30.0  # 30 second timeout for all checks
+            timeout=30.0,  # 30 second timeout for all checks
         )
 
         # Handle any exceptions from gather
         final_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(f"Health check {i} failed with exception", error=str(result), exc_info=True)
-                final_results.append(HealthCheck(
-                    name=f"check_{i}",
-                    status=HealthStatus.UNHEALTHY,
-                    duration_ms=0.0,
-                    message=f"Health check failed: {str(result)}"
-                ))
+                logger.error(
+                    f"Health check {i} failed with exception", error=str(result), exc_info=True
+                )
+                final_results.append(
+                    HealthCheck(
+                        name=f"check_{i}",
+                        status=HealthStatus.UNHEALTHY,
+                        duration_ms=0.0,
+                        message=f"Health check failed: {str(result)}",
+                    )
+                )
             else:
                 final_results.append(result)
 
@@ -350,12 +360,14 @@ async def run_all_health_checks() -> List[HealthCheck]:
 
     except asyncio.TimeoutError:
         logger.error("Health checks timed out")
-        return [HealthCheck(
-            name="timeout",
-            status=HealthStatus.UNHEALTHY,
-            duration_ms=30000.0,
-            message="Health checks timed out after 30 seconds"
-        )]
+        return [
+            HealthCheck(
+                name="timeout",
+                status=HealthStatus.UNHEALTHY,
+                duration_ms=30000.0,
+                message="Health checks timed out after 30 seconds",
+            )
+        ]
 
 
 def calculate_overall_status(checks: List[HealthCheck]) -> HealthStatus:
@@ -423,10 +435,10 @@ async def health_check():
                 "status": check.status.value,
                 "duration_ms": check.duration_ms,
                 "message": check.message,
-                "details": check.details
+                "details": check.details,
             }
             for check in checks
-        ]
+        ],
     )
 
     duration_ms = (time.time() - start_time) * 1000
@@ -434,7 +446,7 @@ async def health_check():
         "Health check completed",
         overall_status=overall_status.value,
         total_duration_ms=round(duration_ms, 2),
-        check_count=len(checks)
+        check_count=len(checks),
     )
 
     # Return appropriate HTTP status
@@ -459,9 +471,7 @@ async def readiness_check():
 
     # Run only critical checks for readiness
     critical_checks = await asyncio.gather(
-        check_database(),
-        check_pgvector(),
-        return_exceptions=True
+        check_database(), check_pgvector(), return_exceptions=True
     )
 
     # Process results
@@ -471,34 +481,32 @@ async def readiness_check():
     for i, result in enumerate(critical_checks):
         if isinstance(result, Exception):
             logger.error(f"Critical check {i} failed", error=str(result), exc_info=True)
-            checks_data.append({
-                "name": f"critical_check_{i}",
-                "status": HealthStatus.UNHEALTHY.value,
-                "message": f"Check failed: {str(result)}"
-            })
+            checks_data.append(
+                {
+                    "name": f"critical_check_{i}",
+                    "status": HealthStatus.UNHEALTHY.value,
+                    "message": f"Check failed: {str(result)}",
+                }
+            )
             ready = False
         else:
-            checks_data.append({
-                "name": result.name,
-                "status": result.status.value,
-                "duration_ms": result.duration_ms,
-                "message": result.message
-            })
+            checks_data.append(
+                {
+                    "name": result.name,
+                    "status": result.status.value,
+                    "duration_ms": result.duration_ms,
+                    "message": result.message,
+                }
+            )
             if result.status != HealthStatus.HEALTHY:
                 ready = False
 
     response = ReadinessResponse(
-        ready=ready,
-        timestamp=datetime.now(timezone.utc),
-        critical_checks=checks_data
+        ready=ready, timestamp=datetime.now(timezone.utc), critical_checks=checks_data
     )
 
     duration_ms = (time.time() - start_time) * 1000
-    logger.info(
-        "Readiness check completed",
-        ready=ready,
-        duration_ms=round(duration_ms, 2)
-    )
+    logger.info("Readiness check completed", ready=ready, duration_ms=round(duration_ms, 2))
 
     # Return appropriate HTTP status
     if not ready:
@@ -519,5 +527,5 @@ async def liveness_check():
     return {
         "status": "alive",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "uptime_seconds": round(time.time() - startup_time, 2)
+        "uptime_seconds": round(time.time() - startup_time, 2),
     }

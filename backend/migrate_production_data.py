@@ -36,13 +36,14 @@ from app.vector_utils import set_embeddings_dual_format
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler(f'migration_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler(f"migration_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 class ProductionMigrator:
     """Handles production data migration with safety features."""
@@ -60,14 +61,14 @@ class ProductionMigrator:
 
         # Migration statistics
         self.stats = {
-            'total_garments': 0,
-            'migrated_garments': 0,
-            'failed_garments': 0,
-            'clip_embeddings_generated': 0,
-            'openai_embeddings_generated': 0,
-            'properties_extracted': 0,
-            'start_time': None,
-            'end_time': None
+            "total_garments": 0,
+            "migrated_garments": 0,
+            "failed_garments": 0,
+            "clip_embeddings_generated": 0,
+            "openai_embeddings_generated": 0,
+            "properties_extracted": 0,
+            "start_time": None,
+            "end_time": None,
         }
 
     def _initialize_clip(self):
@@ -82,20 +83,25 @@ class ProductionMigrator:
     def validate_database_schema(self) -> bool:
         """Validate that the database has the required schema."""
         required_columns = [
-            'clip_image_embedding_vec',
-            'openai_text_embedding_vec',
-            'category', 'primary_color', 'material', 'style',
-            'properties_extracted_at'
+            "clip_image_embedding_vec",
+            "openai_text_embedding_vec",
+            "category",
+            "primary_color",
+            "material",
+            "style",
+            "properties_extracted_at",
         ]
 
         try:
             with self.engine.connect() as conn:
                 # Check Garment table columns
-                result = conn.execute(text("""
+                result = conn.execute(
+                    text("""
                     SELECT column_name
                     FROM information_schema.columns
                     WHERE table_name = 'garments' AND table_schema = 'public'
-                """))
+                """)
+                )
 
                 existing_columns = {row[0] for row in result}
                 missing_columns = [col for col in required_columns if col not in existing_columns]
@@ -112,16 +118,17 @@ class ProductionMigrator:
             logger.error(f"Schema validation failed: {e}")
             return False
 
-    def get_migration_candidates(self, session: Session, batch_size: Optional[int] = None,
-                               force: bool = False) -> Tuple[list, int]:
+    def get_migration_candidates(
+        self, session: Session, batch_size: Optional[int] = None, force: bool = False
+    ) -> Tuple[list, int]:
         """Get garments that need migration."""
         query = session.query(Garment)
 
         if not force:
             # Only migrate garments that haven't been processed
             query = query.filter(
-                (Garment.image_embedding_vec.is_(None)) |
-                (Garment.properties_extracted_at.is_(None))
+                (Garment.image_embedding_vec.is_(None))
+                | (Garment.properties_extracted_at.is_(None))
             )
 
         total_count = query.count()
@@ -136,10 +143,10 @@ class ProductionMigrator:
     def migrate_garment(self, garment: Garment, session: Session) -> Dict[str, bool]:
         """Migrate a single garment with comprehensive error handling."""
         migration_result = {
-            'clip_embedding': False,
-            'openai_embedding': False,
-            'properties_extraction': False,
-            'overall_success': False
+            "clip_embedding": False,
+            "openai_embedding": False,
+            "properties_extraction": False,
+            "overall_success": False,
         }
 
         try:
@@ -151,9 +158,9 @@ class ProductionMigrator:
                     # Generate image embedding
                     image_embedding = self.clip_analyzer.get_image_embedding(garment.image_path)
                     if image_embedding is not None:
-                        set_embeddings_dual_format(garment, 'image_embedding', image_embedding)
-                        migration_result['clip_embedding'] = True
-                        self.stats['clip_embeddings_generated'] += 1
+                        set_embeddings_dual_format(garment, "image_embedding", image_embedding)
+                        migration_result["clip_embedding"] = True
+                        self.stats["clip_embeddings_generated"] += 1
 
                         if not self.dry_run:
                             session.flush()  # Flush but don't commit yet
@@ -169,50 +176,51 @@ class ProductionMigrator:
                     # This would integrate with existing OpenAI embedding service
                     # For now, we'll mark it as ready for OpenAI processing
                     logger.debug(f"Garment {garment.id} ready for OpenAI text embedding")
-                    migration_result['openai_embedding'] = True  # Placeholder
+                    migration_result["openai_embedding"] = True  # Placeholder
 
                 except Exception as e:
                     logger.warning(f"OpenAI embedding failed for garment {garment.id}: {e}")
 
             # 3. Extract ontology properties
             try:
-                if self.ontology_service.extract_properties(garment, session, force_reextract=False):
-                    migration_result['properties_extraction'] = True
-                    self.stats['properties_extracted'] += 1
+                if self.ontology_service.extract_properties(
+                    garment, session, force_reextract=False
+                ):
+                    migration_result["properties_extraction"] = True
+                    self.stats["properties_extracted"] += 1
                     logger.debug(f"Extracted properties for garment {garment.id}")
 
             except Exception as e:
                 logger.warning(f"Property extraction failed for garment {garment.id}: {e}")
 
             # Overall success if at least one component succeeded
-            migration_result['overall_success'] = any([
-                migration_result['clip_embedding'],
-                migration_result['properties_extraction']
-            ])
+            migration_result["overall_success"] = any(
+                [migration_result["clip_embedding"], migration_result["properties_extraction"]]
+            )
 
-            if migration_result['overall_success']:
+            if migration_result["overall_success"]:
                 if not self.dry_run:
                     session.commit()
-                self.stats['migrated_garments'] += 1
+                self.stats["migrated_garments"] += 1
                 logger.info(f"Successfully migrated garment {garment.id}")
             else:
                 if not self.dry_run:
                     session.rollback()
-                self.stats['failed_garments'] += 1
+                self.stats["failed_garments"] += 1
                 logger.warning(f"Migration failed for garment {garment.id}")
 
         except Exception as e:
             logger.error(f"Critical error migrating garment {garment.id}: {e}")
             if not self.dry_run:
                 session.rollback()
-            self.stats['failed_garments'] += 1
+            self.stats["failed_garments"] += 1
 
         return migration_result
 
     def run_migration(self, batch_size: int = 50, force: bool = False) -> bool:
         """Run the complete migration process."""
         logger.info(f"Starting production data migration (dry_run={self.dry_run})")
-        self.stats['start_time'] = datetime.now(UTC)
+        self.stats["start_time"] = datetime.now(UTC)
 
         # Validate schema first
         if not self.validate_database_schema():
@@ -221,12 +229,12 @@ class ProductionMigrator:
         try:
             with self.SessionLocal() as session:
                 # Get migration candidates
-                candidates, total_count = self.get_migration_candidates(
-                    session, batch_size, force
-                )
+                candidates, total_count = self.get_migration_candidates(session, batch_size, force)
 
-                self.stats['total_garments'] = len(candidates)
-                logger.info(f"Found {len(candidates)} garments to migrate (total in DB: {total_count})")
+                self.stats["total_garments"] = len(candidates)
+                logger.info(
+                    f"Found {len(candidates)} garments to migrate (total in DB: {total_count})"
+                )
 
                 if self.dry_run:
                     logger.info("DRY RUN MODE - No actual changes will be made")
@@ -235,7 +243,7 @@ class ProductionMigrator:
                 batch_num = 0
                 for i in range(0, len(candidates), batch_size):
                     batch_num += 1
-                    batch = candidates[i:i + batch_size]
+                    batch = candidates[i : i + batch_size]
 
                     logger.info(f"Processing batch {batch_num} ({len(batch)} garments)")
 
@@ -243,13 +251,15 @@ class ProductionMigrator:
                         self.migrate_garment(garment, session)
 
                         # Progress update
-                        if (self.stats['migrated_garments'] + self.stats['failed_garments']) % 10 == 0:
+                        if (
+                            self.stats["migrated_garments"] + self.stats["failed_garments"]
+                        ) % 10 == 0:
                             self._log_progress()
 
                     # Small delay between batches to avoid overwhelming the system
                     time.sleep(0.1)
 
-                self.stats['end_time'] = datetime.now(UTC)
+                self.stats["end_time"] = datetime.now(UTC)
                 self._log_final_summary()
                 return True
 
@@ -259,16 +269,18 @@ class ProductionMigrator:
 
     def _log_progress(self):
         """Log current migration progress."""
-        total_processed = self.stats['migrated_garments'] + self.stats['failed_garments']
-        if self.stats['total_garments'] > 0:
-            progress = (total_processed / self.stats['total_garments']) * 100
-            logger.info(f"Progress: {total_processed}/{self.stats['total_garments']} "
-                       f"({progress:.1f}%) - Success: {self.stats['migrated_garments']}, "
-                       f"Failed: {self.stats['failed_garments']}")
+        total_processed = self.stats["migrated_garments"] + self.stats["failed_garments"]
+        if self.stats["total_garments"] > 0:
+            progress = (total_processed / self.stats["total_garments"]) * 100
+            logger.info(
+                f"Progress: {total_processed}/{self.stats['total_garments']} "
+                f"({progress:.1f}%) - Success: {self.stats['migrated_garments']}, "
+                f"Failed: {self.stats['failed_garments']}"
+            )
 
     def _log_final_summary(self):
         """Log comprehensive migration summary."""
-        duration = self.stats['end_time'] - self.stats['start_time']
+        duration = self.stats["end_time"] - self.stats["start_time"]
 
         logger.info("=" * 60)
         logger.info("MIGRATION SUMMARY")
@@ -280,8 +292,8 @@ class ProductionMigrator:
         logger.info(f"Properties extracted: {self.stats['properties_extracted']}")
         logger.info(f"Migration duration: {duration}")
 
-        if self.stats['total_garments'] > 0:
-            success_rate = (self.stats['migrated_garments'] / self.stats['total_garments']) * 100
+        if self.stats["total_garments"] > 0:
+            success_rate = (self.stats["migrated_garments"] / self.stats["total_garments"]) * 100
             logger.info(f"Success rate: {success_rate:.1f}%")
 
         if self.dry_run:
@@ -291,20 +303,25 @@ class ProductionMigrator:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Migrate production data to Prethrift v2.0 schema')
-    parser.add_argument('--dry-run', action='store_true',
-                       help='Preview changes without applying them')
-    parser.add_argument('--batch-size', type=int, default=50,
-                       help='Number of garments to process per batch')
-    parser.add_argument('--force', action='store_true',
-                       help='Force re-migration of already processed garments')
-    parser.add_argument('--database-url', type=str,
-                       help='Database URL (if not using default)')
+    parser = argparse.ArgumentParser(description="Migrate production data to Prethrift v2.0 schema")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview changes without applying them"
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=50, help="Number of garments to process per batch"
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="Force re-migration of already processed garments"
+    )
+    parser.add_argument("--database-url", type=str, help="Database URL (if not using default)")
 
     args = parser.parse_args()
 
     # Default database URL (should be set via environment in production)
-    database_url = args.database_url or "postgresql://prethrift_user:prethrift_pass@localhost:5432/prethrift_db"
+    database_url = (
+        args.database_url
+        or "postgresql://prethrift_user:prethrift_pass@localhost:5432/prethrift_db"
+    )
 
     # Create migrator and run
     migrator = ProductionMigrator(database_url, dry_run=args.dry_run)

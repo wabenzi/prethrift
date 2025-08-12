@@ -23,17 +23,21 @@ from app.vector_utils import get_embedding_for_search
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SearchResult:
     """Individual search result with similarity score and metadata."""
+
     garment: Garment
     similarity_score: float
     match_type: str  # 'image', 'text', or 'hybrid'
     metadata_matches: Dict[str, Any]
 
+
 @dataclass
 class SearchQuery:
     """Structured search query combining vector and metadata filters."""
+
     # Vector similarity
     image_embedding: Optional[List[float]] = None
     text_embedding: Optional[List[float]] = None
@@ -51,6 +55,7 @@ class SearchQuery:
     use_vector_search: bool = True
     combine_scores: bool = True
 
+
 class HybridSearchEngine:
     """Advanced search engine combining vector similarity with SQL filtering."""
 
@@ -61,7 +66,9 @@ class HybridSearchEngine:
     def _check_vector_support(self) -> bool:
         """Check if pgvector is available in the database."""
         try:
-            result = self.session.execute(text("SELECT 1 WHERE 'vector' = ANY(SELECT extname FROM pg_extension)"))
+            result = self.session.execute(
+                text("SELECT 1 WHERE 'vector' = ANY(SELECT extname FROM pg_extension)")
+            )
             self.vector_support = result.scalar() is not None
             if self.vector_support:
                 logger.info("✓ pgvector extension detected - native vector search enabled")
@@ -115,18 +122,20 @@ class HybridSearchEngine:
             for garment in garments:
                 similarity_score = 1.0  # Default score
 
-                if query.image_embedding and hasattr(garment, 'image_embedding_vec'):
+                if query.image_embedding and hasattr(garment, "image_embedding_vec"):
                     # This is a simplified similarity calculation for the demo
                     similarity_score = 0.85  # Mock similarity score
-                elif query.text_embedding and hasattr(garment, 'description_embedding_vec'):
+                elif query.text_embedding and hasattr(garment, "description_embedding_vec"):
                     similarity_score = 0.90  # Mock similarity score
 
-                results.append(SearchResult(
-                    garment=garment,
-                    similarity_score=similarity_score,
-                    match_type='image' if query.image_embedding else 'text',
-                    metadata_matches=self._get_metadata_matches(garment, query)
-                ))
+                results.append(
+                    SearchResult(
+                        garment=garment,
+                        similarity_score=similarity_score,
+                        match_type="image" if query.image_embedding else "text",
+                        metadata_matches=self._get_metadata_matches(garment, query),
+                    )
+                )
         except Exception as e:
             logger.error(f"Vector search failed: {e}")
             # Fallback to metadata search
@@ -150,12 +159,14 @@ class HybridSearchEngine:
         try:
             garments = self.session.execute(base_query).scalars().all()
             for garment in garments:
-                results.append(SearchResult(
-                    garment=garment,
-                    similarity_score=1.0,  # No similarity score for metadata-only
-                    match_type='metadata',
-                    metadata_matches=self._get_metadata_matches(garment, query)
-                ))
+                results.append(
+                    SearchResult(
+                        garment=garment,
+                        similarity_score=1.0,  # No similarity score for metadata-only
+                        match_type="metadata",
+                        metadata_matches=self._get_metadata_matches(garment, query),
+                    )
+                )
         except Exception as e:
             logger.error(f"Metadata search failed: {e}")
 
@@ -166,7 +177,7 @@ class HybridSearchEngine:
         conditions = []
 
         if query.brand:
-            conditions.append(Garment.brand.ilike(f'%{query.brand}%'))
+            conditions.append(Garment.brand.ilike(f"%{query.brand}%"))
 
         if query.price_min is not None:
             conditions.append(Garment.price >= query.price_min)
@@ -179,16 +190,18 @@ class HybridSearchEngine:
 
         return conditions
 
-    def _get_vector_similarity_expr(self, embedding: List[float], column_name: str, distance_type: str):
+    def _get_vector_similarity_expr(
+        self, embedding: List[float], column_name: str, distance_type: str
+    ):
         """Get SQLAlchemy expression for vector similarity."""
-        embedding_str = '[' + ','.join(map(str, embedding)) + ']'
+        embedding_str = "[" + ",".join(map(str, embedding)) + "]"
 
-        if distance_type == 'cosine':
+        if distance_type == "cosine":
             # Cosine similarity: 1 - cosine_distance
-            return text(f'1 - ({column_name} <=> \'{embedding_str}\'::vector)')
-        elif distance_type == 'l2':
+            return text(f"1 - ({column_name} <=> '{embedding_str}'::vector)")
+        elif distance_type == "l2":
             # L2 similarity: 1 / (1 + l2_distance)
-            return text(f'1 / (1 + ({column_name} <-> \'{embedding_str}\'::vector))')
+            return text(f"1 / (1 + ({column_name} <-> '{embedding_str}'::vector))")
         else:
             raise ValueError(f"Unknown distance type: {distance_type}")
 
@@ -197,7 +210,7 @@ class HybridSearchEngine:
         matches = {}
 
         if query.brand and garment.brand:
-            matches['brand'] = query.brand.lower() in garment.brand.lower()
+            matches["brand"] = query.brand.lower() in garment.brand.lower()
 
         if query.price_min or query.price_max:
             in_range = True
@@ -205,7 +218,7 @@ class HybridSearchEngine:
                 in_range = in_range and garment.price >= query.price_min
             if query.price_max and garment.price:
                 in_range = in_range and garment.price <= query.price_max
-            matches['price_range'] = in_range
+            matches["price_range"] = in_range
 
         return matches
 
@@ -217,15 +230,15 @@ class HybridSearchEngine:
             return []
 
         # Try to get embeddings for similarity search
-        image_embedding = get_embedding_for_search(source, 'image_embedding')
-        text_embedding = get_embedding_for_search(source, 'description_embedding')
+        image_embedding = get_embedding_for_search(source, "image_embedding")
+        text_embedding = get_embedding_for_search(source, "description_embedding")
 
         if image_embedding or text_embedding:
             query = SearchQuery(
                 image_embedding=image_embedding,
                 text_embedding=text_embedding,
                 limit=limit + 1,  # +1 to exclude the source garment
-                similarity_threshold=0.5
+                similarity_threshold=0.5,
             )
 
             results = self.search(query)

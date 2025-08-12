@@ -14,7 +14,7 @@ from app.local_cv import LocalGarmentAnalyzer
 
 def create_test_image():
     """Create a simple test image for testing."""
-    image = Image.new('RGB', (100, 100), color='red')
+    image = Image.new("RGB", (100, 100), color="red")
     return image
 
 
@@ -26,7 +26,7 @@ def test_cv_system_comparison():
 
     # Convert to bytes for describe_inventory_image_multi
     img_bytes = io.BytesIO()
-    test_image.save(img_bytes, format='JPEG')
+    test_image.save(img_bytes, format="JPEG")
     img_bytes.seek(0)
     image_data = img_bytes.getvalue()
 
@@ -37,22 +37,22 @@ def test_cv_system_comparison():
     print("\n1. LOCAL CV SYSTEM (CLIP-based)")
     print("-" * 30)
 
-    with patch.dict(os.environ, {'USE_LOCAL_CV': 'true'}):
+    with patch.dict(os.environ, {"USE_LOCAL_CV": "true"}):
         # Mock OpenAI to ensure local CV is used
-        with patch('app.inventory_processing.openai_client') as mock_openai:
+        with patch("app.inventory_processing.openai_client") as mock_openai:
             mock_openai.chat.completions.create.side_effect = Exception("Should not call OpenAI")
 
             result_local = describe_inventory_image_multi(
-                image_data,
-                path="test_image.jpg",
-                model="test"
+                image_data, path="test_image.jpg", model="test"
             )
 
             print("✅ Local CV Result:")
             print(f"   Items detected: {len(result_local)}")
             if result_local:
                 for item in result_local[:2]:  # Show first 2 items
-                    print(f"   - {item.get('name', 'Unknown')}: {item.get('description', 'No description')}")
+                    print(
+                        f"   - {item.get('name', 'Unknown')}: {item.get('description', 'No description')}"
+                    )
             print("   Model used: Local CLIP")
             print("   Processing time: Fast (local)")
 
@@ -60,10 +60,10 @@ def test_cv_system_comparison():
     print("\n2. OPENAI SYSTEM (GPT-4o-mini)")
     print("-" * 30)
 
-    with patch.dict(os.environ, {'USE_LOCAL_CV': 'false'}):
+    with patch.dict(os.environ, {"USE_LOCAL_CV": "false"}):
         # Mock OpenAI response
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = '''[
+        mock_response.choices[0].message.content = """[
             {
                 "name": "Red T-Shirt",
                 "category": "Tops",
@@ -75,22 +75,22 @@ def test_cv_system_comparison():
                 "brand": "Unknown",
                 "style": "Casual"
             }
-        ]'''
+        ]"""
 
-        with patch('app.inventory_processing.openai_client') as mock_openai:
+        with patch("app.inventory_processing.openai_client") as mock_openai:
             mock_openai.chat.completions.create.return_value = mock_response
 
             result_openai = describe_inventory_image_multi(
-                image_data,
-                path="test_image.jpg",
-                model="test"
+                image_data, path="test_image.jpg", model="test"
             )
 
             print("✅ OpenAI Result:")
             print(f"   Items detected: {len(result_openai)}")
             if result_openai:
                 for item in result_openai[:2]:  # Show first 2 items
-                    print(f"   - {item.get('name', 'Unknown')}: {item.get('description', 'No description')}")
+                    print(
+                        f"   - {item.get('name', 'Unknown')}: {item.get('description', 'No description')}"
+                    )
             print("   Model used: OpenAI GPT-4o-mini")
             print("   Processing time: Slower (API call)")
 
@@ -109,15 +109,15 @@ def test_cv_system_comparison():
         print(f"   Model: {direct_result.get('model', 'Unknown')}")
 
         # Show detailed analysis
-        if direct_result.get('garments'):
-            garment = direct_result['garments'][0]
-            attrs = direct_result.get('attributes', {}).get(garment['name'], {})
+        if direct_result.get("garments"):
+            garment = direct_result["garments"][0]
+            attrs = direct_result.get("attributes", {}).get(garment["name"], {})
             print(f"   Top garment: {garment['name']} (confidence: {garment['confidence']:.2f})")
-            if attrs.get('colors'):
-                colors = [c['name'] for c in attrs['colors'][:2]]
+            if attrs.get("colors"):
+                colors = [c["name"] for c in attrs["colors"][:2]]
                 print(f"   Colors: {', '.join(colors)}")
-            if attrs.get('styles'):
-                styles = [s['name'] for s in attrs['styles'][:2]]
+            if attrs.get("styles"):
+                styles = [s["name"] for s in attrs["styles"][:2]]
                 print(f"   Styles: {', '.join(styles)}")
     else:
         print("❌ Local CV not available (missing dependencies)")
@@ -161,9 +161,9 @@ def test_local_cv_performance():
 
     # Test with different image types
     test_cases = [
-        ("red_square", Image.new('RGB', (100, 100), color='red')),
-        ("blue_square", Image.new('RGB', (100, 100), color='blue')),
-        ("striped", Image.new('RGB', (100, 100), color='gray')),
+        ("red_square", Image.new("RGB", (100, 100), color="red")),
+        ("blue_square", Image.new("RGB", (100, 100), color="blue")),
+        ("striped", Image.new("RGB", (100, 100), color="gray")),
     ]
 
     print(f"Testing {len(test_cases)} different images...")
@@ -173,8 +173,8 @@ def test_local_cv_performance():
 
     for name, image in test_cases:
         result = analyzer.analyze_image(image)
-        garments = result.get('garments', [])
-        confidence = result.get('confidence', 0.0)
+        garments = result.get("garments", [])
+        confidence = result.get("confidence", 0.0)
 
         total_garments += len(garments)
         total_confidence += confidence

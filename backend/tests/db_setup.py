@@ -6,7 +6,6 @@ For integration tests, we use a separate test database on the same PostgreSQL in
 For unit tests, we mock database interactions.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -33,11 +32,13 @@ def create_test_database():
 
         with admin_engine.connect() as conn:
             # Terminate existing connections to test database
-            conn.execute(text(f"""
+            conn.execute(
+                text(f"""
                 SELECT pg_terminate_backend(pid)
                 FROM pg_stat_activity
                 WHERE datname = '{test_db_name}' AND pid <> pg_backend_pid()
-            """))
+            """)
+            )
 
             # Drop test database if it exists
             conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name}"))
@@ -83,11 +84,13 @@ def cleanup_test_database():
 
         with admin_engine.connect() as conn:
             # Terminate connections and drop database
-            conn.execute(text(f"""
+            conn.execute(
+                text(f"""
                 SELECT pg_terminate_backend(pid)
                 FROM pg_stat_activity
                 WHERE datname = '{test_db_name}' AND pid <> pg_backend_pid()
-            """))
+            """)
+            )
             conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name}"))
 
         admin_engine.dispose()

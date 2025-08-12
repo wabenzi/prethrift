@@ -7,6 +7,7 @@ Steps:
 
 This avoids adding a heavy dependency; for large schemas consider openapi-typescript.
 """
+
 from __future__ import annotations
 
 import json
@@ -89,8 +90,7 @@ def emit_types(spec: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-CLIENT_TEMPLATE = (
-    """{header}import type {{ SearchRequest, SearchResponse, SearchResultItem }} from './types';
+CLIENT_TEMPLATE = """{header}import type {{ SearchRequest, SearchResponse, SearchResultItem }} from './types';
 
 export interface ApiClientOptions {{ baseUrl?: string; fetchImpl?: typeof fetch; }}
 
@@ -114,7 +114,6 @@ export class ApiClient {{
   }}
 }}
 """
-)
 
 
 def emit_client() -> str:
@@ -137,6 +136,7 @@ def main() -> int:
     changed_client = write_if_changed(CLIENT_OUT, client_code)
     print("Updated:" if (changed or changed_client) else "No changes", TYPES_OUT, CLIENT_OUT)
     return 0
+
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

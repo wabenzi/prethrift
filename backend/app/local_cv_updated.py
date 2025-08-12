@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from transformers import CLIPModel, CLIPProcessor
+
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
@@ -27,31 +28,102 @@ class LocalGarmentAnalyzer:
 
     # Comprehensive garment categories optimized for fashion
     GARMENT_CATEGORIES = [
-        "t-shirt", "shirt", "blouse", "tank top", "sweater", "hoodie", "cardigan",
-        "dress", "skirt", "pants", "jeans", "shorts", "leggings", "trousers",
-        "jacket", "coat", "blazer", "vest", "windbreaker", "puffer jacket",
-        "sneakers", "boots", "sandals", "heels", "flats", "loafers",
-        "hat", "cap", "scarf", "belt", "bag", "backpack", "purse",
-        "socks", "underwear", "lingerie", "swimwear", "activewear", "athleisure"
+        "t-shirt",
+        "shirt",
+        "blouse",
+        "tank top",
+        "sweater",
+        "hoodie",
+        "cardigan",
+        "dress",
+        "skirt",
+        "pants",
+        "jeans",
+        "shorts",
+        "leggings",
+        "trousers",
+        "jacket",
+        "coat",
+        "blazer",
+        "vest",
+        "windbreaker",
+        "puffer jacket",
+        "sneakers",
+        "boots",
+        "sandals",
+        "heels",
+        "flats",
+        "loafers",
+        "hat",
+        "cap",
+        "scarf",
+        "belt",
+        "bag",
+        "backpack",
+        "purse",
+        "socks",
+        "underwear",
+        "lingerie",
+        "swimwear",
+        "activewear",
+        "athleisure",
     ]
 
     # Color categories for fashion
     COLOR_CATEGORIES = [
-        "black", "white", "gray", "navy", "blue", "red", "pink", "purple",
-        "green", "yellow", "orange", "brown", "beige", "cream", "khaki",
-        "denim", "multicolor", "patterned", "striped", "plaid"
+        "black",
+        "white",
+        "gray",
+        "navy",
+        "blue",
+        "red",
+        "pink",
+        "purple",
+        "green",
+        "yellow",
+        "orange",
+        "brown",
+        "beige",
+        "cream",
+        "khaki",
+        "denim",
+        "multicolor",
+        "patterned",
+        "striped",
+        "plaid",
     ]
 
     # Style categories
     STYLE_CATEGORIES = [
-        "casual", "formal", "business", "sporty", "elegant", "vintage",
-        "bohemian", "minimalist", "trendy", "classic", "edgy", "romantic"
+        "casual",
+        "formal",
+        "business",
+        "sporty",
+        "elegant",
+        "vintage",
+        "bohemian",
+        "minimalist",
+        "trendy",
+        "classic",
+        "edgy",
+        "romantic",
     ]
 
     # Material categories
     MATERIAL_CATEGORIES = [
-        "cotton", "polyester", "wool", "silk", "linen", "denim", "leather",
-        "synthetic", "blend", "knit", "woven", "stretch", "waterproof"
+        "cotton",
+        "polyester",
+        "wool",
+        "silk",
+        "linen",
+        "denim",
+        "leather",
+        "synthetic",
+        "blend",
+        "knit",
+        "woven",
+        "stretch",
+        "waterproof",
     ]
 
     def __init__(self):
@@ -102,21 +174,23 @@ class LocalGarmentAnalyzer:
             # Extract attributes for each garment
             attributes = {}
             for garment in garments:
-                attributes[garment['name']] = {
-                    'colors': self._classify_colors(image, garment['name']),
-                    'styles': self._classify_styles(image, garment['name']),
-                    'materials': self._classify_materials(image, garment['name'])
+                attributes[garment["name"]] = {
+                    "colors": self._classify_colors(image, garment["name"]),
+                    "styles": self._classify_styles(image, garment["name"]),
+                    "materials": self._classify_materials(image, garment["name"]),
                 }
 
             # Generate natural language description
             description = self._generate_description(garments, attributes)
 
             return {
-                'garments': garments,
-                'attributes': attributes,
-                'description': description,
-                'confidence': sum(g['confidence'] for g in garments) / len(garments) if garments else 0.0,
-                'model': 'local-clip-vit-base-patch32'
+                "garments": garments,
+                "attributes": attributes,
+                "description": description,
+                "confidence": sum(g["confidence"] for g in garments) / len(garments)
+                if garments
+                else 0.0,
+                "model": "local-clip-vit-base-patch32",
             }
 
         except Exception as e:
@@ -134,10 +208,7 @@ class LocalGarmentAnalyzer:
 
             # Process inputs
             inputs = self.processor(
-                text=text_prompts,
-                images=image,
-                return_tensors="pt",
-                padding=True
+                text=text_prompts, images=image, return_tensors="pt", padding=True
             )
 
             # Get predictions
@@ -154,11 +225,13 @@ class LocalGarmentAnalyzer:
             for prob, idx in zip(top_probs, top_indices):
                 confidence = float(prob)
                 if confidence > 0.1:  # Minimum confidence threshold
-                    garments.append({
-                        'name': self.GARMENT_CATEGORIES[idx],
-                        'confidence': confidence,
-                        'category': 'clothing'
-                    })
+                    garments.append(
+                        {
+                            "name": self.GARMENT_CATEGORIES[idx],
+                            "confidence": confidence,
+                            "category": "clothing",
+                        }
+                    )
 
             return garments
 
@@ -175,10 +248,7 @@ class LocalGarmentAnalyzer:
             text_prompts = [f"a {color} {garment}" for color in self.COLOR_CATEGORIES]
 
             inputs = self.processor(
-                text=text_prompts,
-                images=image,
-                return_tensors="pt",
-                padding=True
+                text=text_prompts, images=image, return_tensors="pt", padding=True
             )
 
             with torch.no_grad():
@@ -194,10 +264,7 @@ class LocalGarmentAnalyzer:
             for prob, idx in zip(top_probs, top_indices):
                 confidence = float(prob)
                 if confidence > 0.15:  # Higher threshold for colors
-                    colors.append({
-                        'name': self.COLOR_CATEGORIES[idx],
-                        'confidence': confidence
-                    })
+                    colors.append({"name": self.COLOR_CATEGORIES[idx], "confidence": confidence})
 
             return colors
 
@@ -214,10 +281,7 @@ class LocalGarmentAnalyzer:
             text_prompts = [f"a {style} {garment}" for style in self.STYLE_CATEGORIES]
 
             inputs = self.processor(
-                text=text_prompts,
-                images=image,
-                return_tensors="pt",
-                padding=True
+                text=text_prompts, images=image, return_tensors="pt", padding=True
             )
 
             with torch.no_grad():
@@ -231,10 +295,7 @@ class LocalGarmentAnalyzer:
             for prob, idx in zip(top_probs, top_indices):
                 confidence = float(prob)
                 if confidence > 0.2:  # Higher threshold for styles
-                    styles.append({
-                        'name': self.STYLE_CATEGORIES[idx],
-                        'confidence': confidence
-                    })
+                    styles.append({"name": self.STYLE_CATEGORIES[idx], "confidence": confidence})
 
             return styles
 
@@ -248,13 +309,12 @@ class LocalGarmentAnalyzer:
             return []
 
         try:
-            text_prompts = [f"a {garment} made of {material}" for material in self.MATERIAL_CATEGORIES]
+            text_prompts = [
+                f"a {garment} made of {material}" for material in self.MATERIAL_CATEGORIES
+            ]
 
             inputs = self.processor(
-                text=text_prompts,
-                images=image,
-                return_tensors="pt",
-                padding=True
+                text=text_prompts, images=image, return_tensors="pt", padding=True
             )
 
             with torch.no_grad():
@@ -268,10 +328,9 @@ class LocalGarmentAnalyzer:
             for prob, idx in zip(top_probs, top_indices):
                 confidence = float(prob)
                 if confidence > 0.15:  # Threshold for materials
-                    materials.append({
-                        'name': self.MATERIAL_CATEGORIES[idx],
-                        'confidence': confidence
-                    })
+                    materials.append(
+                        {"name": self.MATERIAL_CATEGORIES[idx], "confidence": confidence}
+                    )
 
             return materials
 
@@ -287,34 +346,34 @@ class LocalGarmentAnalyzer:
         descriptions = []
 
         for garment in garments:
-            garment_name = garment['name']
+            garment_name = garment["name"]
             garment_attrs = attributes.get(garment_name, {})
 
             # Build description parts
             parts = []
 
             # Add colors
-            colors = garment_attrs.get('colors', [])
+            colors = garment_attrs.get("colors", [])
             if colors:
-                color_names = [c['name'] for c in colors[:2]]
-                parts.append(' and '.join(color_names))
+                color_names = [c["name"] for c in colors[:2]]
+                parts.append(" and ".join(color_names))
 
             # Add garment name
             parts.append(garment_name)
 
             # Add style
-            styles = garment_attrs.get('styles', [])
+            styles = garment_attrs.get("styles", [])
             if styles:
-                style_name = styles[0]['name']
+                style_name = styles[0]["name"]
                 parts.append(f"with a {style_name} style")
 
             # Add material
-            materials = garment_attrs.get('materials', [])
+            materials = garment_attrs.get("materials", [])
             if materials:
-                material_name = materials[0]['name']
+                material_name = materials[0]["name"]
                 parts.append(f"appears to be made of {material_name}")
 
-            description = ' '.join(parts)
+            description = " ".join(parts)
             descriptions.append(description.capitalize())
 
         if len(descriptions) == 1:
@@ -329,15 +388,15 @@ class LocalGarmentAnalyzer:
     def _get_fallback_response(self) -> Dict[str, any]:
         """Return a fallback response when the model is not available."""
         return {
-            'garments': [{'name': 'clothing item', 'confidence': 0.5, 'category': 'clothing'}],
-            'attributes': {
-                'clothing item': {
-                    'colors': [{'name': 'unknown', 'confidence': 0.5}],
-                    'styles': [{'name': 'casual', 'confidence': 0.5}],
-                    'materials': [{'name': 'unknown', 'confidence': 0.5}]
+            "garments": [{"name": "clothing item", "confidence": 0.5, "category": "clothing"}],
+            "attributes": {
+                "clothing item": {
+                    "colors": [{"name": "unknown", "confidence": 0.5}],
+                    "styles": [{"name": "casual", "confidence": 0.5}],
+                    "materials": [{"name": "unknown", "confidence": 0.5}],
                 }
             },
-            'description': 'Local computer vision model not available. Showing placeholder data.',
-            'confidence': 0.5,
-            'model': 'fallback'
+            "description": "Local computer vision model not available. Showing placeholder data.",
+            "confidence": 0.5,
+            "model": "fallback",
         }

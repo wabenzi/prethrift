@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 class HealthStatus(str, Enum):
     """Health status enumeration."""
+
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     DEGRADED = "degraded"
@@ -20,6 +21,7 @@ class HealthStatus(str, Enum):
 @dataclass
 class HealthCheck:
     """Individual health check result."""
+
     name: str
     status: HealthStatus
     duration_ms: float
@@ -28,6 +30,7 @@ class HealthCheck:
 
 class HealthResponse(BaseModel):
     """Health check response model."""
+
     status: HealthStatus
     timestamp: datetime
     version: str
@@ -36,9 +39,7 @@ class HealthResponse(BaseModel):
     checks: list
 
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        json_encoders = {datetime: lambda v: v.isoformat()}
 
 
 # Track startup time for uptime calculation
@@ -56,7 +57,7 @@ async def check_basic_health() -> HealthCheck:
             name="basic",
             status=HealthStatus.HEALTHY,
             duration_ms=round(duration_ms, 2),
-            message="Application is running"
+            message="Application is running",
         )
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -64,7 +65,7 @@ async def check_basic_health() -> HealthCheck:
             name="basic",
             status=HealthStatus.UNHEALTHY,
             duration_ms=round(duration_ms, 2),
-            message=f"Error: {str(e)}"
+            message=f"Error: {str(e)}",
         )
 
 
@@ -99,9 +100,9 @@ async def health_check():
                 "name": check.name,
                 "status": check.status.value,
                 "duration_ms": check.duration_ms,
-                "message": check.message
+                "message": check.message,
             }
-        ]
+        ],
     )
 
     # Return appropriate HTTP status
@@ -114,10 +115,7 @@ async def health_check():
 @router.get("/ready")
 async def readiness_check():
     """Simple readiness check."""
-    return {
-        "ready": True,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
+    return {"ready": True, "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 @router.get("/live")
@@ -126,5 +124,5 @@ async def liveness_check():
     return {
         "status": "alive",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "uptime_seconds": round(time.time() - startup_time, 2)
+        "uptime_seconds": round(time.time() - startup_time, 2),
     }
