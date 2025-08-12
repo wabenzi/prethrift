@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Iterable, Mapping
 
@@ -14,18 +15,51 @@ from .ontology import normalize
 
 _ENGINE = None  # lazily initialized
 _ENGINE_URL = None
+_DB_SECRET_CACHE: dict | None = None
+
+
+def _resolve_database_url() -> str:
+    """Derive a SQLAlchemy database URL.
+
+    Priority:
+      1. Explicit DATABASE_URL env var.
+      2. If DATABASE_SECRET_ARN present -> fetch secret (once) from Secrets Manager
+         expecting JSON with keys: username, password, host, port, dbname.
+      3. Fallback to local SQLite file for dev.
+    """
+    url = os.getenv("DATABASE_URL")
+    if url:
+        return url
+    secret_arn = os.getenv("DATABASE_SECRET_ARN")
+    if secret_arn:
+        global _DB_SECRET_CACHE
+        if _DB_SECRET_CACHE is None:  # lazy fetch & cache
+            try:
+                import boto3  # type: ignore
+
+                sm = boto3.client("secretsmanager")
+                resp = sm.get_secret_value(SecretId=secret_arn)
+                raw = resp.get("SecretString") or "{}"
+                _DB_SECRET_CACHE = json.loads(raw)
+            except Exception as e:  # pragma: no cover - best effort
+                raise RuntimeError(f"Failed to retrieve DB secret: {e}") from e
+        cfg = _DB_SECRET_CACHE or {}
+        user = cfg.get("username")
+        pwd = cfg.get("password")
+        host = cfg.get("host") or cfg.get("hostname")
+        port = cfg.get("port", 5432)
+        db = cfg.get("dbname") or cfg.get("database") or "prethrift"
+        if not (user and pwd and host):
+            raise RuntimeError("Database secret missing required fields (username/password/host)")
+        return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{db}"
+    # default local
+    return "sqlite:///./db/prethrift.db"
 
 
 def get_engine():
-    """Return a (possibly re-created) SQLAlchemy engine honoring current DATABASE_URL.
-
-    Tests mutate DATABASE_URL at runtime (per-test temp DB). The original implementation
-    captured the URL at import time causing subsequent tests to operate on stale engines.
-    This helper recreates the engine if the env var changed.
-    """
+    """Return a (possibly re-created) SQLAlchemy engine honoring current config."""
     global _ENGINE, _ENGINE_URL
-    url = os.getenv("DATABASE_URL", "sqlite:///./prethrift.db")
-    # Re-create engine if first use or env var changed
+    url = _resolve_database_url()
     if _ENGINE is None or url != _ENGINE_URL:
         _ENGINE = create_engine(url, future=True)
         _ENGINE_URL = url
