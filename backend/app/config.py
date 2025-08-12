@@ -1,7 +1,7 @@
 """Configuration management for the Prethrift backend."""
 
 import os
-from typing import List, Optional
+from typing import Optional
 
 from pydantic_settings import BaseSettings
 
@@ -70,17 +70,17 @@ class Settings(BaseSettings):
     similarity_threshold: float = 0.7
 
     @property
-    def allowed_origins_list(self) -> List[str]:
+    def allowed_origins_list(self) -> list[str]:
         """Parse comma-separated origins string."""
         return [origin.strip() for origin in self.allowed_origins.split(",")]
 
     @property
-    def allowed_methods_list(self) -> List[str]:
+    def allowed_methods_list(self) -> list[str]:
         """Parse comma-separated methods string."""
         return [method.strip() for method in self.allowed_methods.split(",")]
 
     @property
-    def allowed_headers_list(self) -> List[str]:
+    def allowed_headers_list(self) -> list[str]:
         """Parse comma-separated headers string."""
         return [header.strip() for header in self.allowed_headers.split(",")]
 

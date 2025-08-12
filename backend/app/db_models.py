@@ -26,7 +26,7 @@ except ImportError:
     PGVECTOR_AVAILABLE = False
 
     # Fallback type for when pgvector is not available
-    def Vector(dim: int) -> Any:
+    def Vector(dim: int) -> Any:  # noqa: ARG001
         return JSON
 
 

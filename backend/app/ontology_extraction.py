@@ -8,7 +8,7 @@ rich filtering and display capabilities.
 
 import logging
 from datetime import UTC, datetime
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 try:
     from PIL import Image
@@ -87,7 +87,7 @@ class OntologyExtractionService:
             session.rollback()
             return False
 
-    def _extract_from_image(self, garment: Garment) -> Dict[str, Any]:
+    def _extract_from_image(self, garment: Garment) -> dict[str, Any]:
         """Extract properties from garment image using CLIP."""
         properties = {}
 
@@ -156,7 +156,7 @@ class OntologyExtractionService:
 
         return properties
 
-    def _extract_from_text(self, garment: Garment) -> Dict[str, Any]:
+    def _extract_from_text(self, garment: Garment) -> dict[str, Any]:
         """Extract properties from garment description using ontology mapping."""
         properties = {}
 
@@ -218,8 +218,8 @@ class OntologyExtractionService:
         return properties
 
     def _merge_properties(
-        self, image_props: Dict[str, Any], text_props: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, image_props: dict[str, Any], text_props: dict[str, Any]
+    ) -> dict[str, Any]:
         """Merge properties from image and text analysis, resolving conflicts."""
         merged = {}
 
@@ -240,7 +240,7 @@ class OntologyExtractionService:
 
         return merged
 
-    def _apply_properties(self, garment: Garment, properties: Dict[str, Any]):
+    def _apply_properties(self, garment: Garment, properties: dict[str, Any]):
         """Apply extracted properties to the garment instance."""
         property_fields = [
             "category",
@@ -284,7 +284,7 @@ class OntologyExtractionService:
 
     def batch_extract(
         self, session: Session, limit: Optional[int] = None, force_reextract: bool = False
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """
         Extract properties for multiple garments in batch.
 
@@ -341,7 +341,7 @@ def extract_properties_for_garment(garment_id: int, session: Session) -> bool:
     return service.extract_properties(garment, session)
 
 
-def batch_extract_properties(session: Session, limit: Optional[int] = None) -> Tuple[int, int]:
+def batch_extract_properties(session: Session, limit: Optional[int] = None) -> tuple[int, int]:
     """
     Convenience function for batch property extraction.
 

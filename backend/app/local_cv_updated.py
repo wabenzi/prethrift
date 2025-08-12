@@ -4,7 +4,7 @@ Uses CLIP (Contrastive Language-Image Pre-training) for garment classification a
 """
 
 import logging
-from typing import Dict, List
+from typing import Any
 
 import torch
 from PIL import Image
@@ -154,7 +154,7 @@ class LocalGarmentAnalyzer:
             self.model = None
             self.processor = None
 
-    def analyze_image(self, image: Image.Image) -> Dict[str, any]:
+    def analyze_image(self, image: Image.Image) -> dict[str, Any]:
         """
         Analyze a garment image and return detailed information.
 
@@ -197,7 +197,7 @@ class LocalGarmentAnalyzer:
             logger.error(f"Error analyzing image: {e}")
             return self._get_fallback_response()
 
-    def _classify_garments(self, image: Image.Image) -> List[Dict[str, any]]:
+    def _classify_garments(self, image: Image.Image) -> list[dict[str, Any]]:
         """Classify garments in the image using CLIP."""
         if not self._is_available():
             return []
@@ -239,7 +239,7 @@ class LocalGarmentAnalyzer:
             logger.error(f"Error classifying garments: {e}")
             return []
 
-    def _classify_colors(self, image: Image.Image, garment: str) -> List[Dict[str, any]]:
+    def _classify_colors(self, image: Image.Image, garment: str) -> list[dict[str, Any]]:
         """Classify colors for a specific garment."""
         if not self._is_available():
             return []
@@ -272,7 +272,7 @@ class LocalGarmentAnalyzer:
             logger.error(f"Error classifying colors: {e}")
             return []
 
-    def _classify_styles(self, image: Image.Image, garment: str) -> List[Dict[str, any]]:
+    def _classify_styles(self, image: Image.Image, garment: str) -> list[dict[str, Any]]:
         """Classify style for a specific garment."""
         if not self._is_available():
             return []
@@ -303,7 +303,7 @@ class LocalGarmentAnalyzer:
             logger.error(f"Error classifying styles: {e}")
             return []
 
-    def _classify_materials(self, image: Image.Image, garment: str) -> List[Dict[str, any]]:
+    def _classify_materials(self, image: Image.Image, garment: str) -> list[dict[str, Any]]:
         """Classify materials for a specific garment."""
         if not self._is_available():
             return []
@@ -338,7 +338,7 @@ class LocalGarmentAnalyzer:
             logger.error(f"Error classifying materials: {e}")
             return []
 
-    def _generate_description(self, garments: List[Dict], attributes: Dict) -> str:
+    def _generate_description(self, garments: list[dict], attributes: dict) -> str:
         """Generate a natural language description of the garments."""
         if not garments:
             return "No clear garments detected in the image."
@@ -385,7 +385,7 @@ class LocalGarmentAnalyzer:
         """Check if the local CV model is available."""
         return TRANSFORMERS_AVAILABLE and self.model is not None and self.processor is not None
 
-    def _get_fallback_response(self) -> Dict[str, any]:
+    def _get_fallback_response(self) -> dict[str, Any]:
         """Return a fallback response when the model is not available."""
         return {
             "garments": [{"name": "clothing item", "confidence": 0.5, "category": "clothing"}],

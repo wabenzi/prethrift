@@ -103,7 +103,7 @@ def test_e2e_s3_upload_pipeline(tmp_path, monkeypatch):
                 g = session.get(Garment, it.garment_id)
                 assert g is not None
         # Attribute extraction optional; ensure no integrity errors
-        attrs = session.query(AttributeValue).all()
+        session.query(AttributeValue).all()  # Check no integrity errors
         # Standardization output file exists
         img_path = Path(img.file_path)
         assert img_path.exists(), f"Expected standardized image at {img.file_path}"

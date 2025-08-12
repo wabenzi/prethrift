@@ -14,8 +14,6 @@ if str(ROOT / "backend") not in sys.path:
 def _create_test_image():
     """Create a simple test image for testing."""
     try:
-        import io
-
         from PIL import Image  # type: ignore
 
         # Create a simple colored rectangle that might look like clothing
@@ -111,7 +109,7 @@ if __name__ == "__main__":
             self._env[key] = value
             os.environ[key] = value
 
-        def delenv(self, key, raising=True):
+        def delenv(self, key, raising=True):  # noqa: ARG002
             if key in os.environ:
                 del os.environ[key]
 

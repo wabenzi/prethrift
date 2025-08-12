@@ -12,12 +12,11 @@ pytest
 pytest-cov
 ruff
 mypy
-nox
 pre-commit
 python-jose[cryptography]
 pydantic-settings
 redis
-transformers>=4.20.0
+transformers>=4.55.0
 torch>=2.0.0,<3.0.0
 torchvision>=0.15.0,<1.0.0
 

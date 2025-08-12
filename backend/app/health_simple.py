@@ -77,8 +77,6 @@ router = APIRouter(prefix="/health", tags=["health"])
 async def health_check():
     """Basic health check endpoint."""
 
-    start_time = time.time()
-
     # Run basic health check
     check = await check_basic_health()
 

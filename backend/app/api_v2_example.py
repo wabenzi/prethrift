@@ -6,7 +6,7 @@ system into production API endpoints for maximum functionality.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -83,11 +83,11 @@ class GarmentResponse(BaseModel):
 class SearchResponse(BaseModel):
     """Search results with metadata."""
 
-    results: List[GarmentResponse]
+    results: list[GarmentResponse]
     total_found: int
     search_time_ms: float
-    filters_applied: Dict[str, Any]
-    search_metadata: Dict[str, Any]
+    filters_applied: dict[str, Any]
+    search_metadata: dict[str, Any]
 
 
 # Dependency injection
@@ -247,7 +247,7 @@ async def enhanced_search(
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}") from e
 
 
 @app.get("/api/v2/garments/{garment_id}", response_model=GarmentResponse)
@@ -337,7 +337,7 @@ async def find_similar_garments(
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Similarity search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Similarity search failed: {str(e)}") from e
 
 
 @app.post("/api/v2/garments/{garment_id}/extract-properties")
@@ -346,7 +346,7 @@ async def extract_garment_properties(
     force_reextract: bool = Query(False),
     session: Session = Depends(get_db_session),
     ontology_service: OntologyExtractionService = Depends(get_ontology_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Extract and update ontology properties for a garment."""
     garment = session.get(Garment, garment_id)
     if not garment:
@@ -378,11 +378,11 @@ async def extract_garment_properties(
             raise HTTPException(status_code=500, detail="Property extraction failed")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Property extraction failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Property extraction failed: {str(e)}") from e
 
 
 @app.get("/api/v2/filters/options")
-async def get_filter_options(session: Session = Depends(get_db_session)) -> Dict[str, List[str]]:
+async def get_filter_options(session: Session = Depends(get_db_session)) -> dict[str, list[str]]:
     """Get available filter options from existing garment data."""
     try:
         # Query distinct values for each ontology property
@@ -429,11 +429,13 @@ async def get_filter_options(session: Session = Depends(get_db_session)) -> Dict
         return filter_options
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get filter options: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get filter options: {str(e)}"
+        ) from e
 
 
 @app.get("/api/v2/stats")
-async def get_system_stats(session: Session = Depends(get_db_session)) -> Dict[str, Any]:
+async def get_system_stats(session: Session = Depends(get_db_session)) -> dict[str, Any]:
     """Get system statistics and health metrics."""
     try:
         # Count garments with different embedding types
@@ -484,7 +486,7 @@ async def get_system_stats(session: Session = Depends(get_db_session)) -> Dict[s
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get system stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get system stats: {str(e)}") from e
 
 
 # Example usage client code

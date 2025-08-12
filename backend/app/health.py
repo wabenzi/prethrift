@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import sqlalchemy as sa
 from fastapi import APIRouter, HTTPException
@@ -35,7 +35,7 @@ class HealthCheck:
     status: HealthStatus
     duration_ms: float
     message: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
 
 class HealthResponse(BaseModel):
@@ -46,7 +46,7 @@ class HealthResponse(BaseModel):
     version: str
     environment: str
     uptime_seconds: float
-    checks: List[Dict[str, Any]]
+    checks: list[dict[str, Any]]
 
     class Config:
         json_encoders = {datetime: lambda v: v.isoformat()}
@@ -57,7 +57,7 @@ class ReadinessResponse(BaseModel):
 
     ready: bool
     timestamp: datetime
-    critical_checks: List[Dict[str, Any]]
+    critical_checks: list[dict[str, Any]]
 
     class Config:
         json_encoders = {datetime: lambda v: v.isoformat()}
@@ -319,7 +319,7 @@ async def check_memory_usage() -> HealthCheck:
         )
 
 
-async def run_all_health_checks() -> List[HealthCheck]:
+async def run_all_health_checks() -> list[HealthCheck]:
     """Run all health checks concurrently."""
 
     # Define all health checks
@@ -370,14 +370,13 @@ async def run_all_health_checks() -> List[HealthCheck]:
         ]
 
 
-def calculate_overall_status(checks: List[HealthCheck]) -> HealthStatus:
+def calculate_overall_status(checks: list[HealthCheck]) -> HealthStatus:
     """Calculate overall health status from individual checks."""
 
     if not checks:
         return HealthStatus.UNHEALTHY
 
     # Count status types
-    healthy_count = sum(1 for check in checks if check.status == HealthStatus.HEALTHY)
     degraded_count = sum(1 for check in checks if check.status == HealthStatus.DEGRADED)
     unhealthy_count = sum(1 for check in checks if check.status == HealthStatus.UNHEALTHY)
 

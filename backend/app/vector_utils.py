@@ -2,12 +2,12 @@
 
 import json
 import logging
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
-def migrate_json_to_vector(json_embedding: Optional[List[float]]) -> Optional[Any]:
+def migrate_json_to_vector(json_embedding: Optional[list[float]]) -> Optional[Any]:
     """
     Convert JSON-stored embedding to native vector format.
 
@@ -31,7 +31,7 @@ def migrate_json_to_vector(json_embedding: Optional[List[float]]) -> Optional[An
     return json_embedding
 
 
-def vector_to_json_fallback(vector_embedding: Any) -> Optional[List[float]]:
+def vector_to_json_fallback(vector_embedding: Any) -> Optional[list[float]]:
     """
     Convert native vector back to JSON format for fallback compatibility.
 
@@ -64,7 +64,7 @@ def vector_to_json_fallback(vector_embedding: Any) -> Optional[List[float]]:
         return None
 
 
-def get_embedding_for_search(obj, field_name: str) -> Optional[List[float]]:
+def get_embedding_for_search(obj, field_name: str) -> Optional[list[float]]:
     """
     Get embedding for similarity search, preferring vector column over JSON.
 
@@ -91,7 +91,7 @@ def get_embedding_for_search(obj, field_name: str) -> Optional[List[float]]:
     return None
 
 
-def set_embeddings_dual_format(obj, field_name: str, embedding: List[float]) -> None:
+def set_embeddings_dual_format(obj, field_name: str, embedding: list[float]) -> None:
     """
     Set embedding in both vector and JSON formats for compatibility.
 

@@ -18,7 +18,7 @@ import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import numpy as np
 from PIL import Image
@@ -60,7 +60,7 @@ class DemoDataSetup:
         # Demo garment definitions
         self.demo_garments = self._define_demo_garments()
 
-    def _define_demo_garments(self) -> Dict[str, Dict]:
+    def _define_demo_garments(self) -> dict[str, dict]:
         """Define demo garment data with rich metadata."""
         return {
             "baggy_jeans": {
@@ -193,7 +193,7 @@ class DemoDataSetup:
         Base.metadata.create_all(self.engine)
         print("  ✅ Created fresh tables")
 
-    async def load_descriptions(self) -> Dict[str, str]:
+    async def load_descriptions(self) -> dict[str, str]:
         """Load text descriptions from design/text folder."""
         descriptions = {}
 
@@ -218,7 +218,7 @@ class DemoDataSetup:
 
         return descriptions
 
-    async def extract_ontology_properties(self, descriptions: Dict[str, str]) -> Dict[str, Dict]:
+    async def extract_ontology_properties(self, descriptions: dict[str, str]) -> dict[str, dict]:
         """Extract ontology properties from descriptions."""
         print("\n🏷️  Extracting ontology properties...")
 
@@ -248,7 +248,7 @@ class DemoDataSetup:
 
         return ontology_results
 
-    async def generate_image_embeddings(self) -> Dict[str, Optional[np.ndarray]]:
+    async def generate_image_embeddings(self) -> dict[str, Optional[np.ndarray]]:
         """Generate CLIP embeddings for images."""
         print("\n🖼️  Generating CLIP embeddings...")
 
@@ -283,10 +283,10 @@ class DemoDataSetup:
 
     async def create_garment_records(
         self,
-        descriptions: Dict[str, str],
-        ontology_data: Dict[str, Dict],
-        embeddings: Dict[str, Optional[np.ndarray]],
-    ) -> List[Garment]:
+        descriptions: dict[str, str],
+        ontology_data: dict[str, dict],
+        embeddings: dict[str, Optional[np.ndarray]],
+    ) -> list[Garment]:
         """Create Garment database records."""
         print("\n💾 Creating garment records...")
 

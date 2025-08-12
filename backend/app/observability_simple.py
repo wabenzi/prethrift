@@ -190,7 +190,11 @@ def create_prometheus_metrics_endpoint():
 
     async def metrics_endpoint():
         """Return basic metrics."""
-        return "# HELP http_requests_total Total HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total 0\n"
+        return (
+            "# HELP http_requests_total Total HTTP requests\n"
+            "# TYPE http_requests_total counter\n"
+            "http_requests_total 0\n"
+        )
 
     return metrics_endpoint
 

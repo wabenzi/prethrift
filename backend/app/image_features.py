@@ -18,7 +18,6 @@ import logging
 from contextlib import suppress
 from hashlib import blake2b
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from PIL import Image
@@ -42,10 +41,10 @@ _FEATURE_CACHE_MISSES = 0
 _FEATURE_CACHE_EVICTIONS = 0
 
 # Global CLIP analyzer instance (lazy initialization)
-_clip_analyzer: Optional[LocalGarmentAnalyzer] = None
+_clip_analyzer: LocalGarmentAnalyzer | None = None
 
 
-def _get_clip_analyzer() -> Optional[LocalGarmentAnalyzer]:
+def _get_clip_analyzer() -> LocalGarmentAnalyzer | None:
     """Get or create the global CLIP analyzer instance."""
     global _clip_analyzer
     if not CLIP_AVAILABLE:

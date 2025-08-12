@@ -9,7 +9,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from typing import Any, Dict
+from typing import Any
 
 # Service URLs (using mapped ports from docker-compose.dev.yml)
 BACKEND_URL = "http://localhost:8000"
@@ -19,7 +19,7 @@ GRAFANA_URL = "http://localhost:3000"
 LOCALSTACK_URL = "http://localhost:4567"  # Updated to mapped port
 
 
-def test_endpoint(url: str, description: str) -> Dict[str, Any]:
+def test_endpoint(url: str, description: str) -> dict[str, Any]:
     """Test a single endpoint and return results"""
     try:
         start_time = time.time()

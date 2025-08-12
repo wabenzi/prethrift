@@ -44,7 +44,7 @@ Long-term: Learned re-ranker; style clustering personas; advanced moderation tie
 
 ## Suggested Project Structure Enhancements
 Backend (incremental refactor):
-```
+```text
 backend/app/
 	api/            # routers
 	schemas/        # pydantic models
@@ -53,7 +53,7 @@ backend/app/
 	core/           # config, clients, logging
 ```
 Frontend (web):
-```
+```text
 src/
 	api/            # generated types + client
 	features/search/
@@ -143,7 +143,7 @@ These `.puml` sources render automatically in many IDE plugins. For GitHub rende
 ## Makefile Commands
 Common developer tasks:
 
-```
+```bash
 make install     # create venv + install backend deps
 make dev         # run FastAPI with reload
 make migrate     # run Alembic upgrade head (if script added)
@@ -159,17 +159,18 @@ make clean       # remove venv & caches
 ```
 
 ## Developer Tooling
-Nox sessions (optional):
-```
-nox -l           # list sessions
-nox -s lint      # Ruff lint
-nox -s typecheck # mypy
-nox -s tests     # pytest
-nox -s all       # run lint+type+tests
+
+Use the Makefile for all development tasks:
+```bash
+make lint        # Ruff lint and format check
+make format      # Auto-format with Ruff
+make type        # mypy type checking
+make test        # pytest with coverage
+make ci          # lint + type + test (CI pipeline)
 ```
 
 Pre-commit hooks:
-```
+```bash
 pip install pre-commit  # (or use existing venv)
 pre-commit install
 ```
@@ -177,7 +178,7 @@ Hooks: Ruff (fix & format), mypy, flake8 (extra eyes), basic hygiene checks.
 
 ## Optional OpenAI End-to-End Test
 A cost-incurring integration test (`test_e2e_openai_search.py`) is skipped by default. Run it manually with real API access:
-```
+```bash
 export OPENAI_API_KEY=sk-...
 export RUN_OPENAI_E2E=1
 pytest -q backend/tests/test_e2e_openai_search.py
@@ -192,7 +193,7 @@ Or trigger the manual workflow_dispatch job in GitHub Actions (requires `OPENAI_
 * Updated tests to use `/user/garments/refresh-description` and `/user/preferences/extract` paths.
 
 ## Running Tests
-```
+```bash
 make test
 ```
 All current tests (excluding optional OpenAI E2E) should pass: see CI badge.

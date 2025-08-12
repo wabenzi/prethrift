@@ -20,7 +20,6 @@ import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, Optional, Tuple
 
 # Add the app directory to the path
 sys.path.append(str(Path(__file__).parent / "app"))
@@ -119,8 +118,8 @@ class ProductionMigrator:
             return False
 
     def get_migration_candidates(
-        self, session: Session, batch_size: Optional[int] = None, force: bool = False
-    ) -> Tuple[list, int]:
+        self, session: Session, batch_size: int | None = None, force: bool = False
+    ) -> tuple[list, int]:
         """Get garments that need migration."""
         query = session.query(Garment)
 
@@ -133,14 +132,11 @@ class ProductionMigrator:
 
         total_count = query.count()
 
-        if batch_size:
-            candidates = query.limit(batch_size).all()
-        else:
-            candidates = query.all()
+        candidates = query.limit(batch_size).all() if batch_size else query.all()
 
         return candidates, total_count
 
-    def migrate_garment(self, garment: Garment, session: Session) -> Dict[str, bool]:
+    def migrate_garment(self, garment: Garment, session: Session) -> dict[str, bool]:
         """Migrate a single garment with comprehensive error handling."""
         migration_result = {
             "clip_embedding": False,
@@ -240,9 +236,7 @@ class ProductionMigrator:
                     logger.info("DRY RUN MODE - No actual changes will be made")
 
                 # Process garments in batches
-                batch_num = 0
-                for i in range(0, len(candidates), batch_size):
-                    batch_num += 1
+                for batch_num, i in enumerate(range(0, len(candidates), batch_size), 1):
                     batch = candidates[i : i + batch_size]
 
                     logger.info(f"Processing batch {batch_num} ({len(batch)} garments)")

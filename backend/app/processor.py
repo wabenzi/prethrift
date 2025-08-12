@@ -37,7 +37,7 @@ s3 = boto3.client("s3")
 events = boto3.client("events")
 
 
-def handler(event, context):  # noqa: D401
+def handler(event, context):  # noqa: D401, ARG001
     bucket = os.getenv("IMAGES_BUCKET")
     if not bucket:
         return {"status": "error", "reason": "IMAGES_BUCKET not set"}

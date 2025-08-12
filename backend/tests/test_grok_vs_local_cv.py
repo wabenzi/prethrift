@@ -5,7 +5,6 @@ Uses real garment images and their corresponding Grok analyses from design/ dire
 
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import pytest
 from PIL import Image
@@ -24,7 +23,7 @@ class GrokVsLocalCVComparison:
         self.text_path = self.design_path / "text"
         self.analyzer = LocalGarmentAnalyzer()
 
-    def get_image_description_pairs(self) -> List[Tuple[str, str, str]]:
+    def get_image_description_pairs(self) -> list[tuple[str, str, str]]:
         """
         Get pairs of images and their corresponding Grok descriptions.
         Returns: List of (image_name, image_path, description_text) tuples
@@ -52,7 +51,7 @@ class GrokVsLocalCVComparison:
 
         return pairs
 
-    def analyze_with_local_cv(self, image_path: str) -> Dict:
+    def analyze_with_local_cv(self, image_path: str) -> dict:
         """Analyze image with local CV system."""
         if not self.analyzer._is_available():
             return {
@@ -68,7 +67,7 @@ class GrokVsLocalCVComparison:
         except Exception as e:
             return {"error": str(e), "garments": [], "description": f"Error analyzing image: {e}"}
 
-    def extract_grok_key_terms(self, grok_description: str) -> Dict[str, List[str]]:
+    def extract_grok_key_terms(self, grok_description: str) -> dict[str, list[str]]:
         """
         Extract key terms from Grok description for comparison.
         """
@@ -153,7 +152,7 @@ class GrokVsLocalCVComparison:
             "materials": materials,
         }
 
-    def compare_results(self, local_result: Dict, grok_terms: Dict) -> Dict:
+    def compare_results(self, local_result: dict, grok_terms: dict) -> dict:
         """
         Compare local CV results with extracted Grok terms.
         """
@@ -219,7 +218,7 @@ class GrokVsLocalCVComparison:
 
         return comparison
 
-    def run_comprehensive_comparison(self) -> Dict:
+    def run_comprehensive_comparison(self) -> dict:
         """
         Run comprehensive comparison across all available image-description pairs.
         """
@@ -283,7 +282,7 @@ class GrokVsLocalCVComparison:
 
         return results
 
-    def _calculate_overall_stats(self, results: Dict) -> Dict:
+    def _calculate_overall_stats(self, results: dict) -> dict:
         """Calculate overall statistics across all comparisons."""
         comparisons = [r["comparison"] for r in results.values() if "comparison" in r]
 

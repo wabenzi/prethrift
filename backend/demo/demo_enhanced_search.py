@@ -24,7 +24,7 @@ import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 sys.path.append(str(Path(__file__).parent.parent / "app"))
 
@@ -70,7 +70,7 @@ class SearchDemoRunner:
             self.search_engine = HybridSearchEngine(session)
             print("✅ Hybrid search engine initialized")
 
-    def _load_demo_data(self) -> Dict[str, Dict]:
+    def _load_demo_data(self) -> dict[str, dict]:
         """Load demo garment data from design folder."""
         demo_items = {
             "baggy_jeans": {
@@ -152,7 +152,7 @@ class SearchDemoRunner:
 
         return demo_items
 
-    async def demo_text_search(self) -> Dict[str, Any]:
+    async def demo_text_search(self) -> dict[str, Any]:
         """Demonstrate enhanced text search capabilities."""
         print("\n🔍 DEMO: Enhanced Text Search")
         print("=" * 50)
@@ -230,7 +230,7 @@ class SearchDemoRunner:
 
         return results
 
-    async def demo_visual_similarity(self) -> Dict[str, Any]:
+    async def demo_visual_similarity(self) -> dict[str, Any]:
         """Demonstrate CLIP-based visual similarity search."""
         print("\n🖼️  DEMO: Visual Similarity Search")
         print("=" * 50)
@@ -296,7 +296,7 @@ class SearchDemoRunner:
 
         return results
 
-    async def demo_ontology_extraction(self) -> Dict[str, Any]:
+    async def demo_ontology_extraction(self) -> dict[str, Any]:
         """Demonstrate ontology-based property extraction."""
         print("\n🏷️  DEMO: Ontology Property Extraction")
         print("=" * 50)
@@ -355,7 +355,7 @@ class SearchDemoRunner:
 
         return results
 
-    async def demo_hybrid_search(self) -> Dict[str, Any]:
+    async def demo_hybrid_search(self) -> dict[str, Any]:
         """Demonstrate hybrid search combining multiple signals."""
         print("\n🔄 DEMO: Hybrid Search (Text + Image + Filters)")
         print("=" * 50)
@@ -471,7 +471,7 @@ class SearchDemoRunner:
 
         return results
 
-    async def demo_performance_comparison(self) -> Dict[str, Any]:
+    async def demo_performance_comparison(self) -> dict[str, Any]:
         """Compare performance between legacy and v2.0 search."""
         print("\n⚡ DEMO: Performance Comparison")
         print("=" * 50)
@@ -567,7 +567,7 @@ class SearchDemoRunner:
 
         return results
 
-    async def run_full_demo(self, export_results: bool = False) -> Dict[str, Any]:
+    async def run_full_demo(self, export_results: bool = False) -> dict[str, Any]:
         """Run complete demonstration of all v2.0 features."""
         print("🚀 PRETHRIFT V2.0 SEARCH DEMONSTRATION")
         print("=" * 60)

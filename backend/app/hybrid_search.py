@@ -13,7 +13,7 @@ and relevance. It supports:
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from sqlalchemy import and_, select, text
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ class SearchResult:
     garment: Garment
     similarity_score: float
     match_type: str  # 'image', 'text', or 'hybrid'
-    metadata_matches: Dict[str, Any]
+    metadata_matches: dict[str, Any]
 
 
 @dataclass
@@ -39,15 +39,15 @@ class SearchQuery:
     """Structured search query combining vector and metadata filters."""
 
     # Vector similarity
-    image_embedding: Optional[List[float]] = None
-    text_embedding: Optional[List[float]] = None
+    image_embedding: Optional[list[float]] = None
+    text_embedding: Optional[list[float]] = None
 
     # Metadata filters
     brand: Optional[str] = None
     price_min: Optional[float] = None
     price_max: Optional[float] = None
-    colors: Optional[List[str]] = None
-    categories: Optional[List[str]] = None
+    colors: Optional[list[str]] = None
+    categories: Optional[list[str]] = None
 
     # Search parameters
     limit: int = 20
@@ -80,7 +80,7 @@ class HybridSearchEngine:
             self.vector_support = False
             return False
 
-    def search(self, query: SearchQuery) -> List[SearchResult]:
+    def search(self, query: SearchQuery) -> list[SearchResult]:
         """
         Execute hybrid search combining vector similarity and metadata filtering.
 
@@ -95,7 +95,7 @@ class HybridSearchEngine:
         else:
             return self._metadata_search(query)
 
-    def _vector_search(self, query: SearchQuery) -> List[SearchResult]:
+    def _vector_search(self, query: SearchQuery) -> list[SearchResult]:
         """Execute vector similarity search with optional metadata filtering."""
         base_query = select(Garment)
 
@@ -104,7 +104,8 @@ class HybridSearchEngine:
         if conditions:
             base_query = base_query.where(and_(*conditions))
 
-        # Add vector similarity (simplified for demo - real implementation would use proper pgvector operators)
+        # Add vector similarity (simplified for demo - real implementation would use
+        # proper pgvector operators)
         if self.vector_support and (query.image_embedding or query.text_embedding):
             # For the demo, we'll use a simpler approach without complex SQL expressions
             # In production, you'd use proper pgvector operators
@@ -145,7 +146,7 @@ class HybridSearchEngine:
         results.sort(key=lambda x: x.similarity_score, reverse=True)
         return results
 
-    def _metadata_search(self, query: SearchQuery) -> List[SearchResult]:
+    def _metadata_search(self, query: SearchQuery) -> list[SearchResult]:
         """Execute metadata-only search when vector search is unavailable."""
         base_query = select(Garment)
 
@@ -172,7 +173,7 @@ class HybridSearchEngine:
 
         return results
 
-    def _build_metadata_conditions(self, query: SearchQuery) -> List[Any]:
+    def _build_metadata_conditions(self, query: SearchQuery) -> list[Any]:
         """Build SQLAlchemy conditions from metadata filters."""
         conditions = []
 
@@ -191,7 +192,7 @@ class HybridSearchEngine:
         return conditions
 
     def _get_vector_similarity_expr(
-        self, embedding: List[float], column_name: str, distance_type: str
+        self, embedding: list[float], column_name: str, distance_type: str
     ):
         """Get SQLAlchemy expression for vector similarity."""
         embedding_str = "[" + ",".join(map(str, embedding)) + "]"
@@ -205,7 +206,7 @@ class HybridSearchEngine:
         else:
             raise ValueError(f"Unknown distance type: {distance_type}")
 
-    def _get_metadata_matches(self, garment: Garment, query: SearchQuery) -> Dict[str, Any]:
+    def _get_metadata_matches(self, garment: Garment, query: SearchQuery) -> dict[str, Any]:
         """Get metadata match information for a garment."""
         matches = {}
 
@@ -222,7 +223,7 @@ class HybridSearchEngine:
 
         return matches
 
-    def similar_garments(self, garment_id: int, limit: int = 10) -> List[SearchResult]:
+    def similar_garments(self, garment_id: int, limit: int = 10) -> list[SearchResult]:
         """Find garments similar to a given garment using its embeddings."""
         # Get the source garment
         source = self.session.get(Garment, garment_id)
@@ -248,7 +249,7 @@ class HybridSearchEngine:
         return []
 
 
-def search_garments(session: Session, **kwargs) -> List[SearchResult]:
+def search_garments(session: Session, **kwargs) -> list[SearchResult]:
     """
     Convenience function for searching garments.
 
@@ -264,7 +265,7 @@ def search_garments(session: Session, **kwargs) -> List[SearchResult]:
     return engine.search(query)
 
 
-def find_similar_garments(session: Session, garment_id: int, limit: int = 10) -> List[SearchResult]:
+def find_similar_garments(session: Session, garment_id: int, limit: int = 10) -> list[SearchResult]:
     """
     Find garments similar to the given garment.
 

@@ -2,17 +2,17 @@ import json
 import os
 import time
 import urllib.request
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import Header, HTTPException
 from jose import jwk, jwt
 from jose.utils import base64url_decode
 
-_JWKS_CACHE: Dict[str, Any] | None = None
+_JWKS_CACHE: dict[str, Any] | None = None
 _JWKS_EXPIRES_AT: float = 0.0
 
 
-def _fetch_jwks(jwks_url: str) -> Dict[str, Any]:
+def _fetch_jwks(jwks_url: str) -> dict[str, Any]:
     global _JWKS_CACHE, _JWKS_EXPIRES_AT
     now = time.time()
     if _JWKS_CACHE and now < _JWKS_EXPIRES_AT:
@@ -24,7 +24,7 @@ def _fetch_jwks(jwks_url: str) -> Dict[str, Any]:
     return data
 
 
-def verify_cognito_jwt(token: str) -> Dict[str, Any]:
+def verify_cognito_jwt(token: str) -> dict[str, Any]:
     region = os.getenv("COGNITO_REGION") or os.getenv("AWS_REGION") or "us-east-1"
     user_pool_id = os.getenv("COGNITO_USER_POOL_ID")
     app_client_id = os.getenv("COGNITO_APP_CLIENT_ID")
@@ -34,8 +34,8 @@ def verify_cognito_jwt(token: str) -> Dict[str, Any]:
     keys = _fetch_jwks(jwks_url)["keys"]
     try:
         headers = jwt.get_unverified_header(token)
-    except Exception:  # pragma: no cover - invalid header
-        raise HTTPException(status_code=401, detail="Invalid token header")
+    except Exception as e:  # pragma: no cover - invalid header
+        raise HTTPException(status_code=401, detail="Invalid token header") from e
     kid = headers.get("kid")
     key_data = next((k for k in keys if k.get("kid") == kid), None)
     if not key_data:
@@ -54,13 +54,13 @@ def verify_cognito_jwt(token: str) -> Dict[str, Any]:
     return claims
 
 
-def cognito_dependency(authorization: str | None = Header(default=None)) -> Dict[str, Any]:
+def cognito_dependency(authorization: str | None = Header(default=None)) -> dict[str, Any]:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token")
     token = authorization.split()[1]
     return verify_cognito_jwt(token)
 
 
-def build_user_key_prefix(claims: Dict[str, Any]) -> str:
+def build_user_key_prefix(claims: dict[str, Any]) -> str:
     sub = claims.get("sub") or "anonymous"
     return f"users/{sub}/uploads/"

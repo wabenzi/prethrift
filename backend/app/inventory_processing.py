@@ -37,8 +37,8 @@ def standardize_and_optimize(path: str) -> tuple[str, int, int, str]:
     """Resize & convert image to optimized JPEG; returns (path, w, h, fmt)."""
     try:
         from PIL import Image
-    except ImportError:
-        raise ImportError("PIL/Pillow is required for image processing")
+    except ImportError as e:
+        raise ImportError("PIL/Pillow is required for image processing") from e
 
     max_dim = int(os.getenv("INVENTORY_MAX_DIM", "1024"))
     p = Path(path)

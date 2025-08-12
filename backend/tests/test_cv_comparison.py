@@ -37,9 +37,10 @@ def test_cv_system_comparison():
     print("\n1. LOCAL CV SYSTEM (CLIP-based)")
     print("-" * 30)
 
-    with patch.dict(os.environ, {"USE_LOCAL_CV": "true"}):
-        # Mock OpenAI to ensure local CV is used
-        with patch("app.inventory_processing.openai_client") as mock_openai:
+    with (
+        patch.dict(os.environ, {"USE_LOCAL_CV": "true"}),
+        patch("app.inventory_processing.openai_client") as mock_openai,
+    ):
             mock_openai.chat.completions.create.side_effect = Exception("Should not call OpenAI")
 
             result_local = describe_inventory_image_multi(

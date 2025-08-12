@@ -9,7 +9,7 @@ import base64 as _b64
 import datetime as _dt
 import json as _json
 import sys
-from typing import Any, Dict
+from typing import Any
 
 import boto3
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -162,8 +162,8 @@ def require_api_key(x_api_key: str | None = Header(default=None)):
 def create_presigned_upload(
     req: PresignRequest,
     _: None = Depends(require_api_key),
-    claims: Dict[str, Any] = Depends(cognito_dependency),
-) -> Dict[str, Any]:
+    claims: dict[str, Any] = Depends(cognito_dependency),
+) -> dict[str, Any]:
     """Return pre-signed upload parameters for external clients.
 
     Supports:
