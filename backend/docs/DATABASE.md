@@ -9,7 +9,7 @@ PreThrift uses **PostgreSQL exclusively** for all database operations, standardi
 ### PostgreSQL Configuration
 
 - **Development Environment**: Docker Compose with PostgreSQL 15 + pgvector
-- **Test Environment**: Separate test database on same instance for integration tests  
+- **Test Environment**: Separate test database on same instance for integration tests
 - **Unit Tests**: Mock database interactions (no actual database connections)
 - **Production**: PostgreSQL with connection pooling and read replicas
 
@@ -98,14 +98,14 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 ### Vector Columns
 - `image_embedding_vec VECTOR(512)`: Image feature vectors
-- `description_embedding_vec VECTOR(512)`: Text description vectors  
+- `description_embedding_vec VECTOR(512)`: Text description vectors
 - `openai_text_embedding_vec VECTOR(1536)`: OpenAI embedding vectors
 
 ### Similarity Queries
 ```sql
 -- Cosine similarity search
 SELECT id, title, 1 - (image_embedding_vec <=> $1) AS similarity
-FROM garment 
+FROM garment
 ORDER BY image_embedding_vec <=> $1
 LIMIT 10;
 ```

@@ -50,7 +50,7 @@ python demo/demo_enhanced_search.py --verbose --export-results
 
 ### 3. Computer Vision Comparison
 ```bash
-# Compare local CV vs OpenAI 
+# Compare local CV vs OpenAI
 python demo/demo_local_cv.py
 ```
 

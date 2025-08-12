@@ -52,3 +52,6 @@ docker-data/
 coverage.xml
 reports/
 tmp/
+
+### Large design files ###
+design/logo/*.png

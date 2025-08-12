@@ -17,6 +17,13 @@ export default defineConfig(({ mode }) => {
       strictPort: false,
       open: false,
       cors: true,
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+      },
     },
     preview: {
       port: 4173,

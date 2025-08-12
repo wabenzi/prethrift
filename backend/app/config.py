@@ -139,7 +139,7 @@ class TestSettings(Settings):
     debug: bool = True
     database_url: str = "postgresql://prethrift:prethrift_dev@localhost:5433/prethrift_test"
     redis_url: str = "redis://localhost:6380/1"  # Use different Redis DB for tests
-    
+
     # Test-specific overrides
     log_level: str = "INFO"  # Reduce noise in tests
     enable_tracing: bool = False  # Disable tracing in tests for performance

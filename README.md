@@ -146,6 +146,7 @@ Common developer tasks:
 ```
 make install     # create venv + install backend deps
 make dev         # run FastAPI with reload
+make migrate     # run Alembic upgrade head (if script added)
 make test        # run pytest
 make coverage    # run pytest with HTML coverage report (backend/htmlcov)
 make lint        # ruff lint

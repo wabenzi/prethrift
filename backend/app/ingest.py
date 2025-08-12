@@ -52,7 +52,7 @@ def _resolve_database_url() -> str:
         if not (user and pwd and host):
             raise RuntimeError("Database secret missing required fields (username/password/host)")
         return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{db}"
-    
+
     # Default to local PostgreSQL development database
     return "postgresql://prethrift:prethrift_dev@localhost:5433/prethrift"
 

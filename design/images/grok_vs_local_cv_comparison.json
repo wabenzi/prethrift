@@ -1,0 +1,617 @@
+{
+  "queen-tshirt.jpeg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "t-shirt",
+          "confidence": 0.7955076098442078,
+          "category": "clothing"
+        },
+        {
+          "name": "shirt",
+          "confidence": 0.15984217822551727,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "t-shirt": {
+          "colors": [
+            {
+              "name": "cream",
+              "confidence": 0.18977443873882294
+            },
+            {
+              "name": "brown",
+              "confidence": 0.17284993827342987
+            }
+          ],
+          "styles": [
+            {
+              "name": "bohemian",
+              "confidence": 0.44833338260650635
+            }
+          ],
+          "materials": [
+            {
+              "name": "blend",
+              "confidence": 0.264015257358551
+            },
+            {
+              "name": "linen",
+              "confidence": 0.15895992517471313
+            }
+          ]
+        },
+        "shirt": {
+          "colors": [
+            {
+              "name": "navy",
+              "confidence": 0.42687153816223145
+            }
+          ],
+          "styles": [
+            {
+              "name": "bohemian",
+              "confidence": 0.32469508051872253
+            }
+          ],
+          "materials": [
+            {
+              "name": "blend",
+              "confidence": 0.29425641894340515
+            },
+            {
+              "name": "cotton",
+              "confidence": 0.21161049604415894
+            }
+          ]
+        }
+      },
+      "description": "The image contains: Cream and brown t-shirt with a bohemian style appears to be made of blend; Navy shirt with a bohemian style appears to be made of blend.",
+      "confidence": 0.4776748940348625,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "t-shirt",
+        "shirt",
+        "jeans",
+        "skirt",
+        "shorts"
+      ],
+      "colors": [
+        "orange",
+        "cream",
+        "beige"
+      ],
+      "styles": [
+        "casual",
+        "relaxed",
+        "classic",
+        "streetwear"
+      ],
+      "materials": [
+        "cotton",
+        "blend"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [
+        "t-shirt",
+        "shirt"
+      ],
+      "color_matches": [
+        "cream"
+      ],
+      "style_matches": [],
+      "material_matches": [
+        "blend",
+        "blend",
+        "cotton"
+      ],
+      "local_confidence": 0.4776748940348625,
+      "analysis": {
+        "garment_match_rate": 0.4,
+        "color_match_rate": 0.3333333333333333,
+        "style_match_rate": 0.0,
+        "material_match_rate": 1.5,
+        "local_detected_garments": 2,
+        "grok_mentioned_garments": 5
+      }
+    },
+    "grok_description": "This garment is a short-sleeve graphic t-shirt, featuring a relaxed fit silhouette. The primary color is a soft cream or beige, providing a neutral backdrop for the design. The graphic showcases a bol..."
+  },
+  "baggy-jeans.jpeg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "jeans",
+          "confidence": 0.8848502039909363,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "jeans": {
+          "colors": [
+            {
+              "name": "denim",
+              "confidence": 0.3812238276004791
+            }
+          ],
+          "styles": [
+            {
+              "name": "elegant",
+              "confidence": 0.21097174286842346
+            }
+          ],
+          "materials": [
+            {
+              "name": "denim",
+              "confidence": 0.23293383419513702
+            },
+            {
+              "name": "stretch",
+              "confidence": 0.23189209401607513
+            }
+          ]
+        }
+      },
+      "description": "Denim jeans with a elegant style appears to be made of denim.",
+      "confidence": 0.8848502039909363,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "jeans",
+        "sweater"
+      ],
+      "colors": [
+        "blue",
+        "red",
+        "denim"
+      ],
+      "styles": [
+        "casual",
+        "relaxed",
+        "oversized",
+        "trendy",
+        "streetwear"
+      ],
+      "materials": [
+        "denim"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [
+        "jeans"
+      ],
+      "color_matches": [
+        "denim"
+      ],
+      "style_matches": [],
+      "material_matches": [
+        "denim"
+      ],
+      "local_confidence": 0.8848502039909363,
+      "analysis": {
+        "garment_match_rate": 0.5,
+        "color_match_rate": 0.3333333333333333,
+        "style_match_rate": 0.0,
+        "material_match_rate": 1.0,
+        "local_detected_garments": 1,
+        "grok_mentioned_garments": 2
+      }
+    },
+    "grok_description": "These are wide-leg jeans featuring a relaxed silhouette, crafted from denim in varying shades of blue. The primary color is a medium blue, complemented by darker blue accents, particularly around the ..."
+  },
+  "blue-black-pattern-dress.jpeg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "dress",
+          "confidence": 0.9110487699508667,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "dress": {
+          "colors": [
+            {
+              "name": "patterned",
+              "confidence": 0.5912075042724609
+            },
+            {
+              "name": "multicolor",
+              "confidence": 0.3576735854148865
+            }
+          ],
+          "styles": [
+            {
+              "name": "bohemian",
+              "confidence": 0.26858049631118774
+            },
+            {
+              "name": "vintage",
+              "confidence": 0.22877714037895203
+            }
+          ],
+          "materials": [
+            {
+              "name": "woven",
+              "confidence": 0.3633652627468109
+            },
+            {
+              "name": "blend",
+              "confidence": 0.23138613998889923
+            }
+          ]
+        }
+      },
+      "description": "Patterned and multicolor dress with a bohemian style appears to be made of woven.",
+      "confidence": 0.9110487699508667,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "dress",
+        "skirt"
+      ],
+      "colors": [
+        "black",
+        "white",
+        "blue",
+        "red"
+      ],
+      "styles": [
+        "casual",
+        "formal",
+        "fitted",
+        "classic",
+        "bohemian"
+      ],
+      "materials": [
+        "lightweight"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [
+        "dress"
+      ],
+      "color_matches": [],
+      "style_matches": [
+        "bohemian"
+      ],
+      "material_matches": [],
+      "local_confidence": 0.9110487699508667,
+      "analysis": {
+        "garment_match_rate": 0.5,
+        "color_match_rate": 0.0,
+        "style_match_rate": 0.2,
+        "material_match_rate": 0.0,
+        "local_detected_garments": 1,
+        "grok_mentioned_garments": 2
+      }
+    },
+    "grok_description": "This garment is a sleeveless A-line dress featuring a fitted bodice and a flared skirt. The primary colors include vibrant shades of red, blue, and black, with a secondary color of white used for outl..."
+  },
+  "orange-pattern-dress.jpeg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "dress",
+          "confidence": 0.9541594386100769,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "dress": {
+          "colors": [
+            {
+              "name": "multicolor",
+              "confidence": 0.7210797667503357
+            }
+          ],
+          "styles": [
+            {
+              "name": "vintage",
+              "confidence": 0.2867042124271393
+            },
+            {
+              "name": "bohemian",
+              "confidence": 0.26315078139305115
+            }
+          ],
+          "materials": [
+            {
+              "name": "blend",
+              "confidence": 0.4172384738922119
+            },
+            {
+              "name": "polyester",
+              "confidence": 0.17135749757289886
+            }
+          ]
+        }
+      },
+      "description": "Multicolor dress with a vintage style appears to be made of blend.",
+      "confidence": 0.9541594386100769,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "dress",
+        "skirt"
+      ],
+      "colors": [
+        "red",
+        "orange"
+      ],
+      "styles": [
+        "casual",
+        "fitted",
+        "classic",
+        "bohemian"
+      ],
+      "materials": [
+        "cotton",
+        "blend",
+        "lightweight"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [
+        "dress"
+      ],
+      "color_matches": [],
+      "style_matches": [
+        "bohemian"
+      ],
+      "material_matches": [
+        "blend"
+      ],
+      "local_confidence": 0.9541594386100769,
+      "analysis": {
+        "garment_match_rate": 0.5,
+        "color_match_rate": 0.0,
+        "style_match_rate": 0.25,
+        "material_match_rate": 0.3333333333333333,
+        "local_detected_garments": 1,
+        "grok_mentioned_garments": 2
+      }
+    },
+    "grok_description": "This garment is a sleeveless, knee-length dress featuring a fitted bodice and a flared skirt, creating a classic A-line silhouette. The primary color is a vibrant orange, complemented by a variety of ..."
+  },
+  "flat-mars-shirt.jpeg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "shirt",
+          "confidence": 0.5323824882507324,
+          "category": "clothing"
+        },
+        {
+          "name": "t-shirt",
+          "confidence": 0.35707446932792664,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "shirt": {
+          "colors": [
+            {
+              "name": "navy",
+              "confidence": 0.27064770460128784
+            }
+          ],
+          "styles": [
+            {
+              "name": "classic",
+              "confidence": 0.5171104669570923
+            }
+          ],
+          "materials": [
+            {
+              "name": "polyester",
+              "confidence": 0.359225869178772
+            },
+            {
+              "name": "blend",
+              "confidence": 0.18271994590759277
+            }
+          ]
+        },
+        "t-shirt": {
+          "colors": [
+            {
+              "name": "brown",
+              "confidence": 0.31964218616485596
+            }
+          ],
+          "styles": [
+            {
+              "name": "classic",
+              "confidence": 0.27965080738067627
+            },
+            {
+              "name": "edgy",
+              "confidence": 0.21028737723827362
+            }
+          ],
+          "materials": [
+            {
+              "name": "polyester",
+              "confidence": 0.4039493501186371
+            },
+            {
+              "name": "blend",
+              "confidence": 0.16743385791778564
+            }
+          ]
+        }
+      },
+      "description": "The image contains: Navy shirt with a classic style appears to be made of polyester; Brown t-shirt with a classic style appears to be made of polyester.",
+      "confidence": 0.44472847878932953,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "t-shirt",
+        "shirt"
+      ],
+      "colors": [
+        "black",
+        "white",
+        "orange",
+        "pink"
+      ],
+      "styles": [
+        "casual",
+        "relaxed",
+        "classic"
+      ],
+      "materials": [
+        "cotton",
+        "blend"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [
+        "shirt",
+        "t-shirt"
+      ],
+      "color_matches": [],
+      "style_matches": [
+        "classic",
+        "classic"
+      ],
+      "material_matches": [
+        "blend",
+        "blend"
+      ],
+      "local_confidence": 0.44472847878932953,
+      "analysis": {
+        "garment_match_rate": 1.0,
+        "color_match_rate": 0.0,
+        "style_match_rate": 0.6666666666666666,
+        "material_match_rate": 1.0,
+        "local_detected_garments": 2,
+        "grok_mentioned_garments": 2
+      }
+    },
+    "grok_description": "This garment is a short-sleeve t-shirt featuring a relaxed fit silhouette. The primary color is black, providing a stark contrast to the vibrant graphic design on the front. The dominant graphic showc..."
+  },
+  "test-blue-and-grey-shirts.jpg": {
+    "local_result": {
+      "garments": [
+        {
+          "name": "bag",
+          "confidence": 0.20090723037719727,
+          "category": "clothing"
+        },
+        {
+          "name": "purse",
+          "confidence": 0.11478811502456665,
+          "category": "clothing"
+        }
+      ],
+      "attributes": {
+        "bag": {
+          "colors": [
+            {
+              "name": "cream",
+              "confidence": 0.3390383720397949
+            }
+          ],
+          "styles": [
+            {
+              "name": "bohemian",
+              "confidence": 0.24344612658023834
+            }
+          ],
+          "materials": [
+            {
+              "name": "blend",
+              "confidence": 0.3383377492427826
+            }
+          ]
+        },
+        "purse": {
+          "colors": [
+            {
+              "name": "gray",
+              "confidence": 0.17588044703006744
+            }
+          ],
+          "styles": [
+            {
+              "name": "formal",
+              "confidence": 0.2330472618341446
+            },
+            {
+              "name": "business",
+              "confidence": 0.20505206286907196
+            }
+          ],
+          "materials": [
+            {
+              "name": "blend",
+              "confidence": 0.32752352952957153
+            }
+          ]
+        }
+      },
+      "description": "The image contains: Cream bag with a bohemian style appears to be made of blend; Gray purse with a formal style appears to be made of blend.",
+      "confidence": 0.15784767270088196,
+      "model": "local-clip-vit-base-patch32"
+    },
+    "grok_terms": {
+      "garments": [
+        "t-shirt",
+        "shirt"
+      ],
+      "colors": [
+        "white",
+        "blue",
+        "red",
+        "gray"
+      ],
+      "styles": [
+        "casual",
+        "relaxed"
+      ],
+      "materials": [
+        "cotton",
+        "blend"
+      ]
+    },
+    "comparison": {
+      "garment_matches": [],
+      "color_matches": [
+        "gray"
+      ],
+      "style_matches": [],
+      "material_matches": [
+        "blend",
+        "blend"
+      ],
+      "local_confidence": 0.15784767270088196,
+      "analysis": {
+        "garment_match_rate": 0.0,
+        "color_match_rate": 0.25,
+        "style_match_rate": 0.0,
+        "material_match_rate": 1.0,
+        "local_detected_garments": 2,
+        "grok_mentioned_garments": 2
+      }
+    },
+    "grok_description": "The garment on the left is a blue short-sleeved T-shirt featuring the text \"ORINDA BASEBALL\" in bold red and white letters across the chest, suggesting it may be a sports-related item, possibly from a..."
+  },
+  "_overall_stats": {
+    "avg_garment_match": 0.48333333333333334,
+    "avg_color_match": 0.15277777777777776,
+    "avg_style_match": 0.18611111111111112,
+    "avg_confidence": 0.6383849096794924,
+    "detection_success_rate": 1.0,
+    "total_images_analyzed": 6
+  }
+}

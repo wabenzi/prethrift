@@ -1,0 +1,204 @@
+{
+  "demoMetadata": {
+    "timestamp": "2025-08-11T02:28:53.010Z",
+    "apiBaseUrl": "http://localhost:8000",
+    "frontendUrl": "http://localhost:5173",
+    "demoGarmentsCount": 5
+  },
+  "textSearch": {
+    "baggy_jeans": {
+      "wide leg jeans": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "blue denim": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "star applique": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "casual bottoms": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      }
+    },
+    "pattern_dress": {
+      "geometric dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "blue pattern": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "a-line dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "bohemian style": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      }
+    },
+    "queen_tshirt": {
+      "queen tshirt": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "graphic tee": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "eagle shirt": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "cream colored": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      }
+    },
+    "orange_dress": {
+      "orange dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "floral pattern": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "summer dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "bright colors": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      }
+    },
+    "blue_flower_dress": {
+      "blue floral dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "flower pattern": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "spring dress": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      },
+      "feminine style": {
+        "apiSuccess": false,
+        "error": "Request failed with status code 404"
+      }
+    }
+  },
+  "imageSearch": {
+    "baggy_jeans": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "pattern_dress": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "queen_tshirt": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "orange_dress": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "blue_flower_dress": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    }
+  },
+  "hybridSearch": {
+    "Blue casual summer wear": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "Patterned dresses": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "Graphic t-shirts": {
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    }
+  },
+  "filteringAndFacets": {
+    "Color-based filtering": {
+      "filtersApplied": {
+        "primaryColor": "blue"
+      },
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "Category + Season filtering": {
+      "filtersApplied": {
+        "category": "dresses",
+        "season": "summer"
+      },
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "Style + Occasion filtering": {
+      "filtersApplied": {
+        "style": "casual",
+        "occasion": "everyday"
+      },
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    },
+    "Multi-property filtering": {
+      "filtersApplied": {
+        "category": "tops",
+        "primaryColor": "cream",
+        "style": "graphic",
+        "season": "summer"
+      },
+      "apiSuccess": false,
+      "error": "Request failed with status code 404"
+    }
+  },
+  "performanceMetrics": {
+    "endpointMetrics": {
+      "/search": {
+        "totalCalls": 28,
+        "successfulCalls": 0,
+        "averageDuration": null,
+        "minDuration": null,
+        "maxDuration": null,
+        "successRate": 0,
+        "performanceRating": "Needs Improvement"
+      },
+      "/facets": {
+        "totalCalls": 4,
+        "successfulCalls": 0,
+        "averageDuration": null,
+        "minDuration": null,
+        "maxDuration": null,
+        "successRate": 0,
+        "performanceRating": "Needs Improvement"
+      }
+    },
+    "overallMetrics": {
+      "totalCalls": 32,
+      "averageDuration": 1.8125,
+      "successRate": 0
+    }
+  },
+  "componentExamples": {
+    "enhancedSearch": "\n// EnhancedSearch Component Usage Example\nimport { EnhancedSearch } from '../components/EnhancedSearch';\n\nconst SearchPage = () => {\n  const [searchResults, setSearchResults] = useState([]);\n  \n  const handleSearch = async (searchData) => {\n    console.log('Search triggered:', searchData);\n    // API call handled internally by component\n  };\n\n  return (\n    <div className=\"search-page\">\n      <EnhancedSearch \n        onSearch={handleSearch}\n        placeholder=\"Search for vintage clothes, colors, styles...\"\n        showAdvancedFilters={true}\n        enableImageUpload={true}\n        enableVoiceSearch={false}\n      />\n    </div>\n  );\n};",
+    "searchResults": "\n// SearchResults Component Usage Example\nimport { SearchResults } from '../components/SearchResults';\n\nconst ResultsPage = () => {\n  const [results, setResults] = useState([]);\n  const [loading, setLoading] = useState(false);\n  \n  return (\n    <div className=\"results-page\">\n      <SearchResults\n        results={results}\n        loading={loading}\n        onSimilaritySearch={(garmentId) => {\n          console.log('Finding similar to:', garmentId);\n        }}\n        onFilterChange={(filters) => {\n          console.log('Filters changed:', filters);\n        }}\n        showSimilarityButton={true}\n        enableFiltering={true}\n      />\n    </div>\n  );\n};",
+    "imageUpload": "\n// ImageUpload Component Usage Example\nimport { ImageUpload } from '../components/ImageUpload';\n\nconst VisualSearchPage = () => {\n  const [uploadedImage, setUploadedImage] = useState(null);\n  \n  const handleImageUpload = async (imageFile) => {\n    console.log('Image uploaded:', imageFile.name);\n    setUploadedImage(imageFile);\n    \n    // Trigger visual search\n    const formData = new FormData();\n    formData.append('image', imageFile);\n    // API call to search by image...\n  };\n\n  return (\n    <div className=\"visual-search\">\n      <ImageUpload\n        onImageUpload={handleImageUpload}\n        accept=\"image/*\"\n        maxSize={10 * 1024 * 1024} // 10MB\n        showPreview={true}\n        dragDropText=\"Drop your fashion image here to find similar items\"\n      />\n    </div>\n  );\n};",
+    "fullIntegration": "\n// Complete Integration Example (LandingV2 style)\nimport { useState } from 'react';\nimport { EnhancedSearch } from '../components/EnhancedSearch';\nimport { SearchResults } from '../components/SearchResults';\nimport { apiClientV2 } from '../api/client-v2';\n\nconst FashionSearchApp = () => {\n  const [searchResults, setSearchResults] = useState([]);\n  const [loading, setLoading] = useState(false);\n  const [searchType, setSearchType] = useState('text');\n\n  const handleSearch = async (searchData) => {\n    setLoading(true);\n    try {\n      const results = await apiClientV2.search(searchData);\n      setSearchResults(results.results);\n    } catch (error) {\n      console.error('Search failed:', error);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const handleSimilaritySearch = async (garmentId) => {\n    setLoading(true);\n    try {\n      const results = await apiClientV2.findSimilar(garmentId);\n      setSearchResults(results.results);\n    } catch (error) {\n      console.error('Similarity search failed:', error);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  return (\n    <div className=\"fashion-search-app\">\n      <header>\n        <h1>Prethrift v2.0 - Enhanced Fashion Search</h1>\n        <div className=\"search-type-toggle\">\n          <button \n            className={searchType === 'text' ? 'active' : ''}\n            onClick={() => setSearchType('text')}\n          >\n            Text Search\n          </button>\n          <button \n            className={searchType === 'visual' ? 'active' : ''}\n            onClick={() => setSearchType('visual')}\n          >\n            Visual Search\n          </button>\n          <button \n            className={searchType === 'hybrid' ? 'active' : ''}\n            onClick={() => setSearchType('hybrid')}\n          >\n            Hybrid Search\n          </button>\n        </div>\n      </header>\n      \n      <main>\n        <EnhancedSearch\n          onSearch={handleSearch}\n          searchType={searchType}\n          showAdvancedFilters={true}\n          enableImageUpload={searchType !== 'text'}\n        />\n        \n        <SearchResults\n          results={searchResults}\n          loading={loading}\n          onSimilaritySearch={handleSimilaritySearch}\n          showSimilarityButton={true}\n          enableFiltering={true}\n        />\n      </main>\n    </div>\n  );\n};\n\nexport default FashionSearchApp;"
+  }
+}

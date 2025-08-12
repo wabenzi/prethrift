@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { ApiClient } from '../api/client';
+import type { SearchResponse, SearchResultItem } from '../api/types';
 
 const LOGO_SRC = '/logo.svg';
 const GEO_API = 'https://ipapi.co/json/';
@@ -12,9 +14,36 @@ const countries = [
   // ...add more as needed
 ];
 
+const apiClient = new ApiClient();
+
 export default function Landing() {
   const [country, setCountry] = useState('US');
   const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      const response: SearchResponse = await apiClient.search({
+        query: query.trim(),
+        limit: 20,
+      });
+
+      setSearchResults(response.results ?? []);
+    } catch (error) {
+      console.error('Search failed:', error);
+      setSearchError('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -121,7 +150,7 @@ export default function Landing() {
         <form
           style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}
           onSubmit={(e) => {
-            e.preventDefault(); /* handle search */
+            void handleSearch(e);
           }}
         >
           <input
@@ -131,6 +160,7 @@ export default function Landing() {
               setQuery(e.target.value);
             }}
             placeholder="Search for vintage bags, watches, stories..."
+            disabled={isSearching}
             style={{
               width: '100%',
               fontSize: 22,
@@ -140,48 +170,209 @@ export default function Landing() {
               boxShadow: '0 4px 24px rgba(44,24,16,0.06)',
               outline: 'none',
               marginBottom: 16,
+              opacity: isSearching ? 0.7 : 1,
             }}
           />
+          <button
+            type="submit"
+            disabled={isSearching || !query.trim()}
+            style={{
+              background: isSearching || !query.trim() ? '#ccc' : '#d4af37',
+              color: '#fff',
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: 32,
+              padding: '16px 32px',
+              fontSize: 18,
+              cursor: isSearching || !query.trim() ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 12px rgba(212,175,55,0.2)',
+              width: '100%',
+              marginBottom: 16,
+            }}
+          >
+            {isSearching ? 'Searching...' : 'Search'}
+          </button>
         </form>
+
+        {searchError && (
+          <div style={{
+            color: '#d32f2f',
+            fontSize: 16,
+            marginBottom: 20,
+            padding: '12px 24px',
+            background: '#ffebee',
+            borderRadius: 8,
+            border: '1px solid #ffcdd2'
+          }}>
+            {searchError}
+          </div>
+        )}
+
         <div style={{ color: '#6d4423', fontStyle: 'italic', fontSize: 16, marginBottom: 40 }}>
           Try: "Chanel 90s bag", "Rolex story", "Paris flea market"
         </div>
-        {/* Placeholder for visual language: slideshow, carousel, etc. */}
-        <section style={{ width: '100%', maxWidth: 900, margin: '0 auto', marginTop: 40 }}>
-          {/* Option 1: Slideshow of Curated Finds */}
-          <div style={{ display: 'flex', gap: 32, overflowX: 'auto', padding: 8 }}>
-            {[1, 2, 3].map((i) => {
-              return (
+
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <section style={{ width: '100%', maxWidth: 1200, margin: '0 auto', marginTop: 40 }}>
+            <h2 style={{
+              fontFamily: 'Georgia,serif',
+              fontSize: '1.5rem',
+              color: '#2c1810',
+              marginBottom: 24,
+              textAlign: 'center'
+            }}>
+              Search Results ({searchResults.length} items)
+            </h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 24,
+              padding: 8
+            }}>
+              {searchResults.map((item) => (
                 <div
-                  key={i}
+                  key={item.garment_id}
                   style={{
-                    minWidth: 240,
                     background: '#fff',
                     borderRadius: 18,
                     boxShadow: '0 2px 12px rgba(44,24,16,0.07)',
                     padding: 18,
-                    textAlign: 'center',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(44,24,16,0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 12px rgba(44,24,16,0.07)';
                   }}
                 >
+                  {item.image_path ?? item.thumbnail_url ? (
+                    <img
+                      src={item.thumbnail_url ?? item.image_path}
+                      alt={item.title ?? 'Vintage item'}
+                      style={{
+                        width: '100%',
+                        height: 200,
+                        objectFit: 'cover',
+                        borderRadius: 12,
+                        marginBottom: 12,
+                      }}
+                      onError={(e) => {
+                        // Fallback to placeholder on image error
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const placeholder = target.nextElementSibling as HTMLDivElement;
+                        placeholder.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
                   <div
                     style={{
-                      height: 160,
+                      height: 200,
                       background: '#e8ddd4',
                       borderRadius: 12,
                       marginBottom: 12,
+                      display: item.image_path ?? item.thumbnail_url ? 'none' : 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#6d4423',
+                      fontSize: 14,
                     }}
-                  />
-                  <div style={{ fontWeight: 600, color: '#2c1810', fontSize: 18 }}>
-                    Curated Find #{i}
+                  >
+                    No Image Available
                   </div>
-                  <div style={{ color: '#6d4423', fontSize: 14, marginTop: 4 }}>
-                    Brand, year, story...
+
+                  <div style={{ fontWeight: 600, color: '#2c1810', fontSize: 18, marginBottom: 8 }}>
+                    {item.title ?? 'Vintage Item'}
                   </div>
+
+                  {item.brand && (
+                    <div style={{ color: '#d4af37', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                      {item.brand}
+                    </div>
+                  )}
+
+                  {item.price && (
+                    <div style={{ color: '#2c1810', fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+                      {item.currency ?? '$'}{item.price}
+                    </div>
+                  )}
+
+                  {item.description && (
+                    <div style={{
+                      color: '#6d4423',
+                      fontSize: 14,
+                      lineHeight: 1.4,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      marginBottom: 8
+                    }}>
+                      {item.description}
+                    </div>
+                  )}
+
+                  {item.score && (
+                    <div style={{
+                      color: '#6d4423',
+                      fontSize: 12,
+                      fontStyle: 'italic',
+                      marginTop: 8,
+                      paddingTop: 8,
+                      borderTop: '1px solid #e8ddd4'
+                    }}>
+                      Match: {(item.score * 100).toFixed(0)}%
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Placeholder for visual language when no search results */}
+        {searchResults.length === 0 && !isSearching && (
+          <section style={{ width: '100%', maxWidth: 900, margin: '0 auto', marginTop: 40 }}>
+            {/* Option 1: Slideshow of Curated Finds */}
+            <div style={{ display: 'flex', gap: 32, overflowX: 'auto', padding: 8 }}>
+              {[1, 2, 3].map((i) => {
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      minWidth: 240,
+                      background: '#fff',
+                      borderRadius: 18,
+                      boxShadow: '0 2px 12px rgba(44,24,16,0.07)',
+                      padding: 18,
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: 160,
+                        background: '#e8ddd4',
+                        borderRadius: 12,
+                        marginBottom: 12,
+                      }}
+                    />
+                    <div style={{ fontWeight: 600, color: '#2c1810', fontSize: 18 }}>
+                      Curated Find #{i}
+                    </div>
+                    <div style={{ color: '#6d4423', fontSize: 14, marginTop: 4 }}>
+                      Brand, year, story...
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

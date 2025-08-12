@@ -1,0 +1,6 @@
+# Heavy inference dependencies for Lambda layer
+# Pin versions compatible with Python 3.11 and AWS Lambda constraints.
+torch
+torchvision
+pillow
+scikit-learn

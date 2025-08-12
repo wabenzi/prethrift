@@ -1,12 +1,12 @@
 {
-  "Blue-flower-dress": {
+  "blue-flower-dress": {
     "image_hash": "33ad740369ebc60171ad74f68ecfab2ccc33e5b1",
     "description": "[PLACEHOLDER] Description for Blue-flower-dress.jpeg (dry-run or API unavailable).",
     "embedding": []
   },
-  "Test-blue-and-grey-shirts": {
+  "test-blue-and-grey-shirts": {
     "image_hash": "c129dcdde843394babd6ace64402ca61fed20118",
-    "description": "[PLACEHOLDER] Description for Test-blue-and-grey-shirts.jpg (dry-run or API unavailable).",
+    "description": "",
     "embedding": []
   },
   "baggy-jeans": {
