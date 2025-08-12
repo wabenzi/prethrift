@@ -146,7 +146,7 @@ def configure_tracing():
         otlp_headers = None
         if os.getenv('OTLP_API_KEY'):
             otlp_headers = {"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"}
-        
+
         otlp_exporter = OTLPSpanExporter(
             endpoint=OTLP_ENDPOINT,
             headers=otlp_headers
@@ -159,7 +159,7 @@ def configure_tracing():
             agent_host = JAEGER_ENDPOINT.split('://')[1].split(':')[0]
         else:
             agent_host = JAEGER_ENDPOINT.split(':')[0]
-            
+
         jaeger_exporter = JaegerExporter(
             agent_host_name=agent_host,
             agent_port=14268,  # Default Jaeger thrift port
@@ -175,7 +175,7 @@ def configure_metrics():
         metrics_headers = None
         if os.getenv('OTLP_API_KEY'):
             metrics_headers = {"Authorization": f"Bearer {os.getenv('OTLP_API_KEY')}"}
-            
+
         metric_reader = PeriodicExportingMetricReader(
             OTLPMetricExporter(
                 endpoint=OTLP_ENDPOINT.replace('/v1/traces', '/v1/metrics'),

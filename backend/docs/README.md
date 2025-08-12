@@ -8,14 +8,14 @@ This directory contains comprehensive documentation for the PreThrift backend ap
 - **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development environment setup, local development workflows, and debugging guides
 - **[README-e2e.md](README-e2e.md)** - End-to-end testing documentation and workflows
 
-### Implementation & Architecture  
+### Implementation & Architecture
 - **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Comprehensive overview of backend implementation, features, and architecture decisions
 - **[OBSERVABILITY.md](OBSERVABILITY.md)** - Monitoring, logging, tracing, and observability stack documentation
 
 ### Additional Resources
 - **[../architecture/](../architecture/)** - PlantUML diagrams and API specifications
   - `architecture.puml` - System architecture diagrams
-  - `sequences.puml` - Sequence diagrams for key workflows  
+  - `sequences.puml` - Sequence diagrams for key workflows
   - `openapi.yaml` - API specification and documentation
 - **[../tests/](../tests/)** - Test suites and testing documentation
 

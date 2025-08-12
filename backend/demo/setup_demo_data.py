@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image
 
 # Add app modules to path
-sys.path.append(str(Path(__file__).parent / "app"))
+sys.path.append(str(Path(__file__).parent.parent / "app"))
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -466,7 +466,7 @@ class DemoDataSetup:
 
         print("\n🎯 Ready for demonstrations!")
         print("Next steps:")
-        print("  1. Run backend demo: python demo_enhanced_search.py")
+        print("  1. Run backend demo: python demo/demo_enhanced_search.py")
         print("  2. Run frontend demo: node demo_frontend_integration.js")
         print("  3. Start the API server: uvicorn app.main:app --reload")
         print("  4. Start the frontend: cd frontend/web && npm run dev")
