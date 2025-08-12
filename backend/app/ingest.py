@@ -25,7 +25,7 @@ def _resolve_database_url() -> str:
       1. Explicit DATABASE_URL env var.
       2. If DATABASE_SECRET_ARN present -> fetch secret (once) from Secrets Manager
          expecting JSON with keys: username, password, host, port, dbname.
-      3. Fallback to local SQLite file for dev.
+      3. Docker Compose PostgreSQL default configuration.
     """
     url = os.getenv("DATABASE_URL")
     if url:
@@ -52,8 +52,9 @@ def _resolve_database_url() -> str:
         if not (user and pwd and host):
             raise RuntimeError("Database secret missing required fields (username/password/host)")
         return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{db}"
-    # default local
-    return "sqlite:///./db/prethrift.db"
+    
+    # Default to local PostgreSQL development database
+    return "postgresql://prethrift:prethrift_dev@localhost:5433/prethrift"
 
 
 def get_engine():

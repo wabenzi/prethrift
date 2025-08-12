@@ -15,13 +15,13 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = False
 
-    # Database settings
+    # Database settings (default to Docker development setup)
     database_url: Optional[str] = None
     db_host: str = "localhost"
-    db_port: int = 5432
+    db_port: int = 5433  # Docker mapped port
     db_name: str = "prethrift"
-    db_user: str = "postgres"
-    db_password: str = "postgres"
+    db_user: str = "prethrift"  # Docker username
+    db_password: str = "prethrift_dev"  # Docker password
     db_pool_size: int = 10
     db_max_overflow: int = 20
 
@@ -134,11 +134,15 @@ class ProductionSettings(Settings):
 
 
 class TestSettings(Settings):
-    """Test-specific settings."""
+    """Settings for testing environment."""
+    environment: str = "test"
     debug: bool = True
-    log_level: str = "DEBUG"
-    database_url: str = "sqlite:///./test.db"
-    sentry_dsn: Optional[str] = None  # Disable Sentry in tests
+    database_url: str = "postgresql://prethrift:prethrift_dev@localhost:5433/prethrift_test"
+    redis_url: str = "redis://localhost:6380/1"  # Use different Redis DB for tests
+    
+    # Test-specific overrides
+    log_level: str = "INFO"  # Reduce noise in tests
+    enable_tracing: bool = False  # Disable tracing in tests for performance
 
 
 def get_environment_settings() -> Settings:

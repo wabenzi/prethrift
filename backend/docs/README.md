@@ -19,12 +19,13 @@ This directory contains comprehensive documentation for the PreThrift backend ap
   - `openapi.yaml` - API specification and documentation
 - **[../tests/](../tests/)** - Test suites and testing documentation
 
-## Quick Start
+## 📋 Documentation Index
 
-1. Start with [DEVELOPMENT.md](DEVELOPMENT.md) for environment setup
-2. Review [OBSERVABILITY.md](OBSERVABILITY.md) for monitoring capabilities
-3. Check [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) for feature overview
-4. See [README-e2e.md](README-e2e.md) for testing workflows
+- **[Quick Start Guide](DEVELOPMENT.md)** - Get the development environment running
+- **[Database Architecture](DATABASE.md)** - PostgreSQL setup, testing, and configuration
+- **[Observability Guide](OBSERVABILITY.md)** - Monitoring, tracing, and metrics
+- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete technical overview
+- **[End-to-End Testing](README-e2e.md)** - Integration testing workflows
 
 ## Project Structure
 
